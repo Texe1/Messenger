@@ -1,0 +1,6 @@
+<c		|	asking for contacts
+>c		|	giving contacts
+q		|	quitting
+mp		|	message (plain text)
+me		|	message (encrypted[aes])
+n		|	giving name
