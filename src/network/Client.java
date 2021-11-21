@@ -5,9 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import aes.Encryption;
 import aes.KeySchedule;
 
@@ -23,11 +20,13 @@ public class Client {
 	String name;
 	int serverPort;
 	
-	public CopyOnWriteArrayList<String> msgQueue = new CopyOnWriteArrayList<>();
+//	public CopyOnWriteArrayList<String> msgQueue = new CopyOnWriteArrayList<>();
 
 	private boolean loop = true;
 	private int sendAttempts = 0;
 
+	public boolean isWaiting() {return loop;}
+	
 	public void registerToServer(String host, int port, String name) {
 		this.host = host;
 		this.serverPort = port;
@@ -47,9 +46,10 @@ public class Client {
 		}
 	}
 
-	private void send(String s) {
-
-		if (s.startsWith("me")) {// wants to encrypt message
+	public void send(String s) {
+		if (s.equals("q")) {
+			deRegister();
+		}else if (s.startsWith("me")) {// wants to encrypt message
 			
 			String msg = s.substring(2);
 			String name;
@@ -83,7 +83,7 @@ public class Client {
 				// converting key to char[8]
 				char[] keyAschars = new char[8];
 
-				String[] splitKey = KeySchedule.Key.split("(?<=\\G.{16})");
+				String[] splitKey = key.split("(?<=\\G.{16})");
 
 				for (int i = 0; i < 8; i++) {
 					keyAschars[i] = (char) Integer.parseInt(splitKey[i], 2);
@@ -150,9 +150,10 @@ public class Client {
 		}
 
 		while (loop) {
+			System.out.println("test");
+			
 			try {
 				String s = in.readUTF();
-				System.out.println(s);
 				if (s.startsWith(">c")) {
 					if (s.length() > 3) {
 						s = s.substring(3);
@@ -164,21 +165,14 @@ public class Client {
 					System.out.println("name changed to: \"" + name + "\"");
 				}
 			} catch (IOException e) {
-				if (loop)
-					e.printStackTrace();
-				break;
-			}
-			
-			if(msgQueue.size() > 0) {// sending queued message
-				String msg = msgQueue.get(0);
-				send(msg);
-				msgQueue.remove(0);
+				if (loop)e.printStackTrace();
 			}
 			
 		}
 	}
 
 	public void deRegister() {
+		System.out.println("disconnecting...");
 		try {
 			out.writeUTF("q");
 			loop = false;
@@ -199,8 +193,6 @@ public class Client {
 
 	public static class ClientThread extends Thread{
 		
-		private boolean run = true;
-		
 		private Client client;
 		
 		public ClientThread(Client client) {
@@ -209,7 +201,7 @@ public class Client {
 		
 		@Override
 		public void run() {
-			client.waitForMessage();
+			while(client.loop)client.waitForMessage();
 		}
 	}
 
