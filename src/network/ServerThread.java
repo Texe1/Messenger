@@ -49,14 +49,14 @@ public class ServerThread extends Thread {
 					break;
 
 				} else if (s.startsWith("m")) { // sending a message to other client
-					String name = s.substring(2).split(" ")[0];
+					String name = s.substring(2, s.indexOf('\\'));
 					if (Server.clientNames.contains(name)) {// the requested receiver is connected to the server
 						Socket receiver = Server.clients.get(Server.clientNames.indexOf(name));
 						String send = s.replaceFirst(name, clientName);
 						DataOutputStream rOut = new DataOutputStream(receiver.getOutputStream());
 						rOut.writeUTF(send);
 					} else {// the requested receiver is not connected to the server
-						System.err.println("Server Error:\n\r\tCould not find client for receiving message from "
+						System.err.println("Server Error:\n\r\tCould not find client \"" + name + "\" for receiving message from "
 								+ clientName + " at " + client.getInetAddress() + ":" + client.getLocalPort());
 					}
 				} else {
