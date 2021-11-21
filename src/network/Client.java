@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import aes.Encryption;
 import aes.KeySchedule;
@@ -21,6 +22,8 @@ public class Client {
 	String host;
 	String name;
 	int serverPort;
+	
+	public CopyOnWriteArrayList<String> msgQueue = new CopyOnWriteArrayList<>();
 
 	private boolean loop = true;
 	private int sendAttempts = 0;
@@ -44,7 +47,7 @@ public class Client {
 		}
 	}
 
-	public void send(String s) {
+	private void send(String s) {
 
 		if (s.startsWith("me")) {// wants to encrypt message
 			
@@ -138,7 +141,7 @@ public class Client {
 		}
 	}
 
-	public void waitForMessage() {
+	public void waitForMessage() {// waiting for Messages from Server or User
 		try {
 			in = new DataInputStream(client.getInputStream());
 		} catch (IOException e) {
@@ -165,6 +168,13 @@ public class Client {
 					e.printStackTrace();
 				break;
 			}
+			
+			if(msgQueue.size() > 0) {// sending queued message
+				String msg = msgQueue.get(0);
+				send(msg);
+				msgQueue.remove(0);
+			}
+			
 		}
 	}
 
