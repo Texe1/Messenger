@@ -65,7 +65,7 @@ public class Main {
 			String host = sc.nextLine();
 			System.out.print("Port:");
 			int port = Integer.valueOf(sc.nextLine());
-			System.out.print("Prefered Name:");
+			System.out.print("Preferred Name:");
 			String name = sc.nextLine();
 			
 			Client c = new Client();
@@ -77,13 +77,12 @@ public class Main {
 			
 			while(true) {
 				String s = sc.nextLine();
-				System.out.println(s);
 				if(s.startsWith("-f")) {
 					try {
 						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
 						s = "";
 						while (fsc.hasNextLine()) {
-							s += fsc.nextLine();
+							s += "\n" + fsc.nextLine();
 						}
 					} catch (FileNotFoundException e) {
 						System.err.println("Error: Could not find file \"" + s.substring(2).strip() + "\"");
