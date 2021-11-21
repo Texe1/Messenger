@@ -15,7 +15,6 @@ public class Encryption {
 		String[] ZwischenText = new String[2];
 		char c;
 		String OutputString = "";
-		String OutputNumberString = "";
 
 		for (int i = 0; i < s.length(); i += 16) {
 			WorkChar = s.substring(i, (i + 16)).toCharArray();
@@ -79,10 +78,6 @@ public class Encryption {
 
 			for (int j = 0; j < 16; j++) {
 				OutputString += WorkChar[j];
-			}
-
-			for (int j = 0; j < 16; j++) {
-				OutputNumberString += Integer.valueOf(WorkChar[j]) + ";";
 			}
 
 		}
