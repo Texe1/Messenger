@@ -3,6 +3,7 @@ package network;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,12 +17,31 @@ public class Server {
 	
 	public static int clientCounter = 0;
 	
+	public static OutputStream logger;
+	
 	public static void start(int port) {
 		try {
 			server = new ServerSocket(port);
 			server.setSoTimeout(300000);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void setLogger(OutputStream out) {
+		logger = out;
+	}
+	
+	public static void log(String s) {
+		if(logger == null)logger = System.out;
+		
+		try {
+			logger.write((s + "\n").getBytes());
+			logger.flush();
+		} catch (IOException e) {
+			System.err.println("Could not access logger, switching to command prompt.");
+			logger = System.out;
+			System.out.println(s);
 		}
 	}
 	
@@ -64,10 +84,13 @@ public class Server {
 		
 		clients.add(client);
 		clientNames.add(name);
+		
+		log(name + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "] has connected to the server");
+		
 		try {
 			new DataOutputStream(client.getOutputStream()).writeUTF("n" + name);
 		} catch (IOException e) {
-			System.err.println("Could not send name verification message to client at " + client.getInetAddress() + ":" + client.getLocalPort());
+			System.err.println("Could not send name verification message to client at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
 			e.printStackTrace();
 		}
 		

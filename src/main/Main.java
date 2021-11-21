@@ -2,6 +2,9 @@ package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 
 import network.Client;
@@ -17,67 +20,52 @@ public class Main {
 		String in = sc.nextLine();
 		if (in.equals("s")) {
 			Server.start(1337);
-			Server.laufen();
-		} else if (in.equals("c")) {
-//			String s = "Hallo, Welt";
-//
-//			// encryption
-//			String encrypted = Encryption.encrypt(s);
-////			System.out.println(encrypted);
-//
-//			// binaryString to char[] conversion
-//			char[] keyAschars = new char[8];
-//
-//			String[] splitKey = KeySchedule.Key.split("(?<=\\G.{16})");
-//
-//			for (int i = 0; i < 8; i++) {
-//				keyAschars[i] = (char) Integer.parseInt(splitKey[i], 2);
-//				for (int j = 0; j < 16; j++) {
-////					System.out.print(((keyAschars[i] & (1 << (15 - j))) != 0) ? "1" : "0");
-//				}
-//			}
-//			
-////			System.out.println(Decryption.decrypt(encrypted, KeySchedule.Key));
-//			
-//			String send = "meaes";
-//			
-//			for(char c : keyAschars) {
-//				send += "" + c;
-//			}
-//			
-////			System.out.println(send.length());
-//			
-//			send += encrypted;
-//			
-////			System.out.println(send.length());
-////			
-////			
-////			System.out.println();
-////
-////			System.out.println();
-////			for(char c : send.toCharArray()) {
-////				System.out.println((int)c);
-////			}
-////			System.out.println();
-////			System.out.println();
+			File f = new File("rsc\\serverLog.txt");
+			if (!f.exists()) {
+				try {
+					f.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			
+			FileOutputStream fout;
+			
+			try {
+				fout = new FileOutputStream(f);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return;
+			}
+			
+			Server.setLogger(fout);
+			Server.log("Session: " + new Timestamp(System.currentTimeMillis()));
+			Server.laufen();
+			
+			try {
+				fout.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (in.equals("c")) {
+
 			System.out.print("Host IP:");
 			String host = sc.nextLine();
 			System.out.print("Port:");
 			int port = Integer.valueOf(sc.nextLine());
 			System.out.print("Preferred Name:");
 			String name = sc.nextLine();
-			
+
 			Client c = new Client();
 			c.registerToServer(host, port, name);
 			Client.ClientThread ct = new ClientThread(c);
 			ct.start();
-			
+
 //			c.send("Hello, World!");
-			
-			while(true) {
+
+			while (true) {
 				String s = sc.nextLine();
-				if(s.startsWith("-f")) {
+				if (s.startsWith("-f")) {
 					try {
 						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
 						s = "";
@@ -91,14 +79,15 @@ public class Main {
 				}
 
 				c.send(s);
-				
-				if(s.equals("q") || !c.isWaiting()) break;
-				
+
+				if (s.equals("q") || !c.isWaiting())
+					break;
+
 			}
-		}else {
+		} else {
 			System.out.println("that was not one of the options!");
 		}
-		
+
 		sc.close();
 	}
 
