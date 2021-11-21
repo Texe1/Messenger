@@ -76,7 +76,6 @@ public class Client {
 			}
 			if (msg.startsWith("aes")) {// specific request to encrypt with aes
 				msg = msg.substring(3);
-				System.out.println(msg);
 
 				
 				// encrypting the main message
@@ -182,7 +181,17 @@ public class Client {
 					
 					System.out.println("Message by '" + origin + "': \n" + msg);
 					
-					
+				}else if(s.startsWith("mp")) {
+					if(s.contains("\\") && !s.substring(2).startsWith("\\")) {
+						String name = s.substring(2, s.indexOf('\\'));
+						System.out.println("message from <" + name + ">\n\t" + s.substring(s.indexOf('\\')+1));
+					}else {
+						s = s.substring(2);
+						if(s.startsWith("\\")) {
+							s = s.substring(1);
+						}
+						System.out.println("Message from <Anonymus>:\n\t" + s);
+					}
 				}
 			} catch (IOException e) {
 				if (loop)e.printStackTrace();
