@@ -104,7 +104,7 @@ public class Client {
 					} catch (IOException e) {
 						System.err.println("I/O error: could not get DataOutputStream:");
 						e.printStackTrace();
-						if(sendAttempts > 10) {
+						if(sendAttempts++ > 10) {
 							System.err.println("problem constantly recurring...\nshutdown initiated...");
 							deRegister();
 							return;
@@ -116,6 +116,9 @@ public class Client {
 						return;
 					}
 				}
+				
+				sendAttempts = 0;
+				
 				try {// sending message to Server
 					out.writeUTF(send);
 				} catch (IOException e) {
