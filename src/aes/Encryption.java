@@ -82,8 +82,8 @@ public class Encryption {
 
 		}
 
-		System.out.println(OutputString);
-		System.out.println();
+//		System.out.println(OutputString);
+//		System.out.println();
 		return (OutputString);
 
 	}

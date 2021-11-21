@@ -16,7 +16,7 @@ public class Decryption {
 //		for (int i = 0; i < EingabeText.length; i++) {
 //			s+=(char)(int)(Integer.valueOf(EingabeText[i]));
 //		}
-		System.out.println("encrypted message:\n" + s);
+//		System.out.println("encrypted message:\n" + s);
 		for (int i = 0; i < s.length(); i += 16) {
 			WorkChar = s.substring(i, (i + 16)).toCharArray();
 

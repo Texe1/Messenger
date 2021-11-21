@@ -19,7 +19,7 @@ public class KeySchedule {
 		// TODO char[] key (unimplemented)
 		for (int i = 0; i < 8; i++) {
 			key[i] = (char) r.nextInt(65536);
-			System.out.println(Integer.toBinaryString((int) key[i]));
+//			System.out.println(Integer.toBinaryString((int) key[i]));
 		}
 
 		for (int i = 0; i < 128; i++) {
@@ -42,9 +42,9 @@ public class KeySchedule {
 			Z = Integer.parseInt(split[i], 2);
 			KeyText += ((char) Z);
 		}
-		System.out.println("128bit-Key:");
-		System.out.println(key);
-		// System.out.println(KeyText);
+//		System.out.println("128bit-Key:");
+//		System.out.println(key);
+//		 System.out.println(KeyText);
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
