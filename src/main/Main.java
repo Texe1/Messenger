@@ -1,11 +1,11 @@
 package main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import aes.Decryption;
-import aes.Encryption;
-import aes.KeySchedule;
 import network.Client;
+import network.Client.ClientThread;
 import network.Server;
 
 public class Main {
@@ -39,7 +39,7 @@ public class Main {
 //			
 ////			System.out.println(Decryption.decrypt(encrypted, KeySchedule.Key));
 //			
-//			String send = "m-eaes";
+//			String send = "meaes";
 //			
 //			for(char c : keyAschars) {
 //				send += "" + c;
@@ -61,25 +61,46 @@ public class Main {
 ////			System.out.println();
 ////			System.out.println();
 			
+			System.out.print("Host IP:");
+			String host = sc.nextLine();
+			System.out.print("Port:");
+			int port = Integer.valueOf(sc.nextLine());
+			System.out.print("Prefered Name:");
+			String name = sc.nextLine();
+			
 			Client c = new Client();
-			c.registerToServer("localhost", 1337, "0");
-			c.waitForMessage();
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
+			c.registerToServer(host, port, name);
+			Client.ClientThread ct = new ClientThread(c);
+			ct.start();
 			
 //			c.send("Hello, World!");
 			
 			while(true) {
-				;
+				String s = sc.nextLine();
+				System.out.println(s);
+				if(s.startsWith("-f")) {
+					try {
+						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
+						s = "";
+						while (fsc.hasNextLine()) {
+							s += fsc.nextLine();
+						}
+					} catch (FileNotFoundException e) {
+						System.err.println("Error: Could not find file \"" + s.substring(2).strip() + "\"");
+						e.printStackTrace();
+					}
+				}
+
+				c.send(s);
+				
+				if(s.equals("q") || !c.isWaiting()) break;
+				
 			}
-			
-//			c.send(send, "localhost", 1337);
 		}else {
 			System.out.println("that was not one of the options!");
 		}
+		
+		sc.close();
 	}
 
 }
