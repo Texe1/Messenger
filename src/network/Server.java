@@ -84,6 +84,12 @@ public class Server {
 				if (!name.equals(clientNames.get(i)))
 					namesList += " " + name;
 			}
+			
+			try {
+				new DataOutputStream(clients.get(i).getOutputStream()).writeUTF(namesList);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
