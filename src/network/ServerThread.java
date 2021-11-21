@@ -33,18 +33,17 @@ public class ServerThread extends Thread {
 			try {
 				String s = in.readUTF();
 				if (s.strip().equals("<c")) {// contact request
-					System.out.println("contacts requested by " + clientName + " at " + client.getInetAddress() + ":"
-							+ client.getLocalPort());
+					Server.log("contacts requested by " + clientName + " at " + client.getInetAddress() + ":" + client.getLocalPort());
 					String namesList = ">c";
 					for (String name : Server.clientNames) {
 						if (!name.equals(clientName))
 							namesList += " " + name;
 					}
 					out.writeUTF(namesList);
-					System.out.println(namesList);
 				} else if (s.strip().equals("q")) {// quit message
 					Server.clients.remove(client);
 					Server.clientNames.remove(clientName);
+					Server.log(clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "] has disconnected.");
 					client.close();//
 					break;
 
@@ -57,13 +56,13 @@ public class ServerThread extends Thread {
 						rOut.writeUTF(send);
 					} else {// the requested receiver is not connected to the server
 						System.err.println("Server Error:\n\r\tCould not find client \"" + name + "\" for receiving message from "
-								+ clientName + " at " + client.getInetAddress() + ":" + client.getLocalPort());
+								+ clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
 					}
 				} else {
-					System.out.println("<" + clientName + "> " + s + "| could not understand intentions");
+					Server.log("<" + clientName + "> " + s + "| could not understand intentions");
 				}
 			} catch (IOException e) {
-				System.out.println("Reading from client " + clientName + " failed:");
+				Server.log("Reading from client " + clientName + " failed:");
 				e.printStackTrace();
 				break;
 			}
