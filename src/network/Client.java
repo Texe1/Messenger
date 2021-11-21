@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
 
@@ -62,7 +64,7 @@ public class Client {
 				name = msg.substring(1).split("\"")[0];
 				msg = msg.substring(name.length() + 2);// "name" gets stripped away from message
 			} else if (msg.contains("\\") && !msg.startsWith("\\")) { // name ends with \
-				name = msg.split("\\")[0];
+				name = msg.substring(0, msg.indexOf('\\'));
 				msg = msg.substring(name.length() + 1);// name\ gets stripped away from message
 			} else {
 				System.err.println("Message syntax error:\n\tCould not detect receiver name");
@@ -74,6 +76,7 @@ public class Client {
 			}
 			if (msg.startsWith("aes")) {// specific request to encrypt with aes
 				msg = msg.substring(3);
+				System.out.println(msg);
 
 				
 				// encrypting the main message
@@ -150,7 +153,6 @@ public class Client {
 		}
 
 		while (loop) {
-			System.out.println("test");
 			
 			try {
 				String s = in.readUTF();
@@ -158,11 +160,29 @@ public class Client {
 					if (s.length() > 3) {
 						s = s.substring(3);
 						contacts = s.split(" ");
-						System.out.println(s.replace(' ', '\n').replace(name, "").replace("\n\n", "\n"));
+						System.out.println("received updated contacts list:\n\t" + s.replace(" ", "\n\t").replace(name, "").replace("\n\n", "\n"));
 					}
 				} else if (s.startsWith("n")) {
 					name = s.substring(1);
 					System.out.println("name changed to: \"" + name + "\"");
+				}else if (s.startsWith("me")) {
+					String origin = s.substring(2, s.indexOf('\\'));
+					String encrMsg = s.substring(s.indexOf('\\')+12);
+					char[] keyAsChars = s.substring(s.indexOf('\\')+4, s.indexOf('\\')+12).toCharArray();
+					
+					String keyBinStr = "";
+					
+					for (char c : keyAsChars) {
+						String t = Integer.toBinaryString((int)c);
+						while(t.length() < 16) t = "0" + t;
+						keyBinStr += t;
+					}
+					
+					String msg = Decryption.decrypt(encrMsg, keyBinStr);
+					
+					System.out.println("Message by '" + origin + "': \n" + msg);
+					
+					
 				}
 			} catch (IOException e) {
 				if (loop)e.printStackTrace();
