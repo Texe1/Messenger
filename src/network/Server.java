@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
 	
 	public static ServerSocket server;
 	
-	public static HashMap<String, Socket> clients = new HashMap<String, Socket>();
+	public static CopyOnWriteArrayList<String> clientNames = new CopyOnWriteArrayList<>();
+	public static CopyOnWriteArrayList<Socket> clients = new CopyOnWriteArrayList<>();
 	
 	public static int clientCounter = 0;
 	
@@ -29,21 +31,10 @@ public class Server {
 		while(true) {
 			try {
 				Socket client = server.accept();
-//				System.out.println("Input detected...\nDecrypting...");
 				DataInputStream in = new DataInputStream(client.getInputStream());
-				String s = in.readUTF();
+				String name = in.readUTF();
 				
-				new ServerThread(s, client).start();
-				
-				if(clients.containsKey(s)) {
-					while(!clients.containsKey(Integer.toString(++clientCounter))) {
-						clients.put(Integer.toString(clientCounter), client);
-					}
-					new DataOutputStream(client.getOutputStream()).writeUTF("n" + clientCounter);
-				}else {
-					clients.put(s, client);
-					new DataOutputStream(client.getOutputStream()).writeUTF("n" + s);
-				}
+				addClient(client, name);
 				
 //				System.out.println(s);
 //				char[] key = s.substring(0, 8).toCharArray();
@@ -63,4 +54,37 @@ public class Server {
 			}
 		}
 	}
+	
+	public static void addClient(Socket client, String name) {
+		if(clientNames.contains(name)) {
+			while(clientNames.contains(Integer.toString(++clientCounter))) {
+				;
+			}
+			name = Integer.toString(clientCounter);
+		}
+		
+		clients.add(client);
+		clientNames.add(name);
+		try {
+			new DataOutputStream(client.getOutputStream()).writeUTF("n" + name);
+		} catch (IOException e) {
+			System.err.println("Could not send name verification message to client at " + client.getInetAddress() + ":" + client.getLocalPort());
+			e.printStackTrace();
+		}
+		
+		new ServerThread(name, client).start();
+		updateContacts();
+	}
+	
+	public static void updateContacts() {// sends updated contacts to every client
+		String namesList;
+		for (int i = 0; i < clientNames.size(); i++) {
+			namesList = ">c";
+			for (String name : Server.clientNames) {
+				if (!name.equals(clientNames.get(i)))
+					namesList += " " + name;
+			}
+		}
+	}
+	
 }
