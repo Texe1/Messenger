@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Set;
 
 public class ServerThread extends Thread {
 
@@ -55,7 +54,7 @@ public class ServerThread extends Thread {
 						Socket receiver = Server.clients.get(Server.clientNames.indexOf(name));
 						String send = s.replaceFirst(name, clientName);
 						DataOutputStream rOut = new DataOutputStream(receiver.getOutputStream());
-						rOut.writeUTF(s);
+						rOut.writeUTF(send);
 					} else {// the requested receiver is not connected to the server
 						System.err.println("Server Error:\n\r\tCould not find client for receiving message from "
 								+ clientName + " at " + client.getInetAddress() + ":" + client.getLocalPort());
