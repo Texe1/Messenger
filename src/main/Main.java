@@ -1,6 +1,7 @@
 package main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,13 +18,22 @@ public class Main {
 		System.out.println("s => Server\nc => Client");
 
 		Scanner sc = new Scanner(System.in);
-		String in = sc.nextLine();
-		if (in.equals("s")) {
+		String input = sc.nextLine();
+		if (input.equals("s")) {
 			Server.start(1337);
 			File f = new File("rsc\\serverLog.txt");
+			byte[] bs = new byte[0];
 			if (!f.exists()) {
 				try {
 					f.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else {
+				FileInputStream in;
+				try {
+					in = new FileInputStream(f);
+					bs = in.readAllBytes();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -33,13 +43,14 @@ public class Main {
 			
 			try {
 				fout = new FileOutputStream(f);
-			} catch (FileNotFoundException e) {
+				fout.write(bs);
+			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
 			
 			Server.setLogger(fout);
-			Server.log("Session: " + new Timestamp(System.currentTimeMillis()));
+			Server.startSession();
 			Server.laufen();
 			
 			try {
@@ -47,7 +58,7 @@ public class Main {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} else if (in.equals("c")) {
+		} else if (input.equals("c")) {
 
 			System.out.print("Host IP:");
 			String host = sc.nextLine();

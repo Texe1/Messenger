@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Timestamp;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
@@ -30,13 +31,32 @@ public class Server {
 	
 	public static void setLogger(OutputStream out) {
 		logger = out;
+		log("Session: " + new Timestamp(System.currentTimeMillis()));
 	}
+	
 	
 	public static void log(String s) {
 		if(logger == null)logger = System.out;
 		
+		s = "<" + new Timestamp(System.currentTimeMillis()) + ">\t" + s + "\n";
+		
 		try {
-			logger.write((s + "\n").getBytes());
+			logger.write(s.getBytes());
+			logger.flush();
+		} catch (IOException e) {
+			System.err.println("Could not access logger, switching to command prompt.");
+			logger = System.out;
+			System.out.println(s);
+		}
+	}
+	
+	public static void startSession() {
+		if(logger == null)logger = System.out;
+		
+		String s = "____________________\n<" + new Timestamp(System.currentTimeMillis()) + ">\tNew session started\n";
+		
+		try {
+			logger.write(s.getBytes());
 			logger.flush();
 		} catch (IOException e) {
 			System.err.println("Could not access logger, switching to command prompt.");
