@@ -8,13 +8,15 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Scanner;
 
+import gui.Frame;
 import network.Client;
 import network.Client.ClientThread;
 import network.Server;
 
 public class Main {
-
+	
 	public static void main(String[] args) {
+		
 		System.out.println("s => Server\nc => Client");
 
 		Scanner sc = new Scanner(System.in);
@@ -71,30 +73,30 @@ public class Main {
 			c.registerToServer(host, port, name);
 			Client.ClientThread ct = new ClientThread(c);
 			ct.start();
+			
+			Frame f = new Frame(c);
 
-//			c.send("Hello, World!");
-
-			while (true) {
-				String s = sc.nextLine();
-				if (s.startsWith("-f")) {
-					try {
-						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
-						s = "";
-						while (fsc.hasNextLine()) {
-							s += "\n" + fsc.nextLine();
-						}
-					} catch (FileNotFoundException e) {
-						System.err.println("Error: Could not find file \"" + s.substring(2).strip() + "\"");
-						e.printStackTrace();
-					}
-				}
-
-				c.send(s);
-
-				if (s.equals("q") || !c.isWaiting())
-					break;
-
-			}
+//			while (true) {
+//				String s = sc.nextLine();
+//				if (s.startsWith("-f")) {
+//					try {
+//						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
+//						s = "";
+//						while (fsc.hasNextLine()) {
+//							s += "\n" + fsc.nextLine();
+//						}
+//					} catch (FileNotFoundException e) {
+//						System.err.println("Error: Could not find file \"" + s.substring(2).strip() + "\"");
+//						e.printStackTrace();
+//					}
+//				}
+//
+//				c.send(s);
+//
+//				if (s.equals("q") || !c.isWaiting())
+//					break;
+//
+//			}
 		} else {
 			System.out.println("that was not one of the options!");
 		}
