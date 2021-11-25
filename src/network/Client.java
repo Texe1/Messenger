@@ -5,10 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.AbstractMap.SimpleEntry;
 
 import aes.Decryption;
 import aes.Encryption;
@@ -19,12 +16,16 @@ public class Client {
 	Socket client;
 	DataOutputStream out;
 	DataInputStream in;
+	
+	ClientThread ct = new ClientThread(this);
 
 	String[] contacts;
 
 	String host;
 	String name;
 	int serverPort;
+	
+	public boolean connected;
 
 	private ArrayList<ArrayList<String>> chats = new ArrayList<>();
 
@@ -39,7 +40,7 @@ public class Client {
 		return loop;
 	}
 
-	public void registerToServer(String host, int port, String name) {
+	public void connect(String host, int port, String name) {
 		this.host = host;
 		this.serverPort = port;
 
@@ -56,11 +57,15 @@ public class Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		ct.start();
+		
+		connected = true;
 	}
 
 	public void send(String s) {
 		if (s.equals("q")) {
-			deRegister();
+			disconnect();
 		} else if (s.startsWith("me")) {// wants to encrypt message
 
 			String msg = s.substring(2);
@@ -120,7 +125,7 @@ public class Client {
 						e.printStackTrace();
 						if (sendAttempts++ > 10) {
 							System.err.println("problem constantly recurring...\nshutdown initiated...");
-							deRegister();
+							disconnect();
 							return;
 						}
 						System.err.println("rebooting client...");
@@ -212,24 +217,25 @@ public class Client {
 		}
 	}
 
-	public void deRegister() {
+	public void disconnect() {
 		System.out.println("disconnecting...");
 		try {
 			out.writeUTF("q");
 			loop = false;
+			connected = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void reboot() {
-		deRegister();
+		disconnect();
 		try {
 			Thread.sleep(1000);// waiting for server to complete deRegistration
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		registerToServer(host, serverPort, name);
+		connect(host, serverPort, name);
 	}
 
 	public void beginChat(String name, String encryption) {
@@ -274,6 +280,8 @@ public class Client {
 		s += name + "\\" + chat.get(1) + msg;
 
 		chat.add(msg);
+		
+		send(s);
 
 		return true;
 	}

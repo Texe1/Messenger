@@ -62,17 +62,7 @@ public class Main {
 			}
 		} else if (input.equals("c")) {
 
-			System.out.print("Host IP:");
-			String host = sc.nextLine();
-			System.out.print("Port:");
-			int port = Integer.valueOf(sc.nextLine());
-			System.out.print("Preferred Name:");
-			String name = sc.nextLine();
-
 			Client c = new Client();
-			c.registerToServer(host, port, name);
-			Client.ClientThread ct = new ClientThread(c);
-			ct.start();
 			
 			Frame f = new Frame(c);
 
