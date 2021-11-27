@@ -196,11 +196,15 @@ public class Client {
 					String msg = Decryption.decrypt(encrMsg, keyBinStr);
 
 					System.out.println("Message by '" + origin + "': \n" + msg);
+					
+					addToChat(origin, msg);
 
 				} else if (s.startsWith("mp")) {
 					if (s.contains("\\") && !s.substring(2).startsWith("\\")) {
 						String name = s.substring(2, s.indexOf('\\'));
-						System.out.println("message from <" + name + ">\n\t" + s.substring(s.indexOf('\\') + 1));
+						String msg = s.substring(s.indexOf('\\') + 1);
+						System.out.println("message from <" + name + ">\n\t" + msg);
+						addToChat(name, msg);
 					} else {
 						s = s.substring(2);
 						if (s.startsWith("\\")) {
@@ -279,13 +283,29 @@ public class Client {
 
 		s += name + "\\" + chat.get(1) + msg;
 
-		chat.add(msg);
+		chat.add("\\" + msg);
 		
 		send(s);
 
 		return true;
 	}
 
+	public void addToChat(String name, String msg) {
+		ArrayList<String> chat = null;
+		for (ArrayList<String> c : chats) {
+			if (c.get(0).equals(name)) {
+				chat = c;
+			}
+		}
+		
+		if(chat == null) {
+			beginChat(name);
+			chat = chats.get(chats.size()-1);
+		}
+		
+		chat.add(name + "\\" + msg);
+	}
+	
 	public String[][] getChats() {
 		String[][] ret = new String[chats.size()][];
 
