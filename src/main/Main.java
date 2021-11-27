@@ -2,15 +2,12 @@ package main;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Scanner;
 
 import gui.Frame;
 import network.Client;
-import network.Client.ClientThread;
 import network.Server;
 
 public class Main {
@@ -65,6 +62,7 @@ public class Main {
 			Client c = new Client();
 			
 			Frame f = new Frame(c);
+			f.requestFocus();
 
 //			while (true) {
 //				String s = sc.nextLine();
