@@ -215,6 +215,7 @@ public class Frame extends JFrame {
 					if (tf_hostIP.getText().isBlank() || tf_port.getText().isBlank() || tf_name.getText().isBlank())
 						return;
 
+					System.out.println(tf_hostIP.getText());
 					client.connect(tf_hostIP.getText(), Integer.parseInt(tf_port.getText()), tf_name.getText());
 					if (client.connected)
 						this.setText("connect");
@@ -293,7 +294,7 @@ public class Frame extends JFrame {
 		String[] contacts = client.getContacts();
 		
 		for (String name : contacts) {
-			add(new Chat(client, 250, 100, 750, 800, name));
+			add(new Chat(client, 250, 100, 750, 600, name));
 		}
 		System.out.println("Why?");
 		menu.update();
