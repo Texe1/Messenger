@@ -12,6 +12,8 @@ public class Group extends Drawable{
 	protected CopyOnWriteArrayList<Button> buttons = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<TextField> textFields = new CopyOnWriteArrayList<>();
 	
+	public String name = "Anonymus";
+	
 	public void add(Drawable d) {
 		drawables.add(d);
 	}
@@ -45,4 +47,6 @@ public class Group extends Drawable{
 			d.draw(g);
 		}
 	}
+	
+	public void update() {}
 }
