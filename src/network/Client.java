@@ -19,11 +19,13 @@ public class Client {
 	
 	ClientThread ct = new ClientThread(this);
 
-	String[] contacts;
+	private String[] contacts;
 
 	String host;
 	String name;
 	int serverPort;
+	
+	public boolean receivedContacts = false;
 	
 	public boolean connected;
 
@@ -64,6 +66,7 @@ public class Client {
 	}
 
 	public void send(String s) {
+		System.out.println(s);
 		if (s.equals("q")) {
 			disconnect();
 		} else if (s.startsWith("me")) {// wants to encrypt message
@@ -170,6 +173,8 @@ public class Client {
 			try {
 				String s = in.readUTF();
 				if (s.startsWith(">c")) {
+					receivedContacts = true;
+					
 					if (s.length() > 3) {
 						s = s.substring(3);
 						contacts = s.split(" ");
@@ -242,16 +247,20 @@ public class Client {
 		connect(host, serverPort, name);
 	}
 
-	public void beginChat(String name, String encryption) {
+	public ArrayList<String> beginChat(String name, String encryption) {
 		chats.add(new ArrayList<String>());
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
+		
+		return chats.get(chats.size() -1);
 	}
 
-	public void beginChat(String name) {
+	public ArrayList<String> beginChat(String name) {
 		chats.add(new ArrayList<String>());
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add("");
+		
+		return chats.get(chats.size() -1);
 	}
 
 	public void encryptChat(String name, String encryption) {
@@ -272,7 +281,7 @@ public class Client {
 
 		if (chat == null) {
 			System.err.println("Error: could not find current chat with '" + name + "'");
-			return false;
+			chat = beginChat(name, "aes");
 		}
 
 		String s = "mp";
@@ -291,6 +300,7 @@ public class Client {
 	}
 
 	public void addToChat(String name, String msg) {
+		System.out.println(name);
 		ArrayList<String> chat = null;
 		for (ArrayList<String> c : chats) {
 			if (c.get(0).equals(name)) {
@@ -299,8 +309,7 @@ public class Client {
 		}
 		
 		if(chat == null) {
-			beginChat(name);
-			chat = chats.get(chats.size()-1);
+			chat = beginChat(name, "aes");
 		}
 		
 //		chat.add(name + "\\" + msg);
@@ -318,6 +327,11 @@ public class Client {
 		}
 
 		return ret;
+	}
+
+	public String[] getContacts() {
+		if(contacts == null) return new String[0];
+		return contacts;
 	}
 
 	public static class ClientThread extends Thread {

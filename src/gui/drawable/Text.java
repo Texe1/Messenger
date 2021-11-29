@@ -11,7 +11,6 @@ import java.util.ArrayList;
 public class Text extends Drawable {
 	private String s;
 	private Font f;
-	private Point pos;
 	public Rectangle r = new Rectangle();
 
 	public int maxWidth = 0;
@@ -20,7 +19,6 @@ public class Text extends Drawable {
 	public Text(String s, int fontSize, Point pos) {
 		this.s = s;
 		f = new Font(Font.MONOSPACED, Font.PLAIN, fontSize);
-		this.pos = pos;
 	}
 
 	public Text(String s, int fontSize, int x, int y) {

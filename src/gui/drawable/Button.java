@@ -7,7 +7,8 @@ import java.awt.Graphics;
 public abstract class Button extends Drawable{
 	protected boolean focussed = false, clicked = false;
 	
-	protected int x, y, width, height;
+	public int x, y, width, height;
+	public int edgeRadius = 10;
 	
 	protected String text = "";
 	
@@ -42,7 +43,7 @@ public abstract class Button extends Drawable{
 	public void draw(Graphics g) {
 		g.setColor(color[focussed ? (clicked ? 2 : 1) : 0]);
 
-		g.fillRoundRect(x, y, width, height, 10, 10);
+		g.fillRoundRect(x, y, width, height, edgeRadius, edgeRadius);
 		
 		if(!text.isEmpty()) {
 			g.setFont(f);
