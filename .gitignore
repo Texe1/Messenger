@@ -1,3 +1,4 @@
 
 rsc/serverLog.txt
 bin/
+*.class
