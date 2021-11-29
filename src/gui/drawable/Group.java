@@ -1,8 +1,9 @@
 package gui.drawable;
 
+import java.awt.Graphics;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Group {
+public class Group extends Drawable{
 	protected CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<Button> buttons = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<TextField> textFields = new CopyOnWriteArrayList<>();
@@ -32,5 +33,12 @@ public class Group {
 
 	public CopyOnWriteArrayList<TextField> getTextFields() {
 		return textFields;
+	}
+	
+	@Override
+	public void draw(Graphics g) {
+		for (Drawable d : drawables) {
+			d.draw(g);
+		}
 	}
 }

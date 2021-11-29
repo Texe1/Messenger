@@ -13,12 +13,10 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JFrame;
 
 import gui.drawable.Button;
-import gui.drawable.Drawable;
 import gui.drawable.Group;
 import gui.drawable.Text;
 import gui.drawable.TextField;
@@ -28,11 +26,8 @@ public class Frame extends JFrame {
 
 	private static final long serialVersionUID = -8246131571704187284L;
 
-	private CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
-	private CopyOnWriteArrayList<Button> buttons = new CopyOnWriteArrayList<>();
-	private CopyOnWriteArrayList<TextField> textFields = new CopyOnWriteArrayList<>();
-
 	private ArrayList<Group> groups = new ArrayList<>();
+	private Group currentGroup;
 	
 	private TextField tf_hostIP;
 	private TextField tf_port;
@@ -81,11 +76,11 @@ public class Frame extends JFrame {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				for (Button b : buttons) {
+				for (Button b : currentGroup.getButtons()) {
 					b.setClicked(false);
 				}
 
-				for (TextField t : textFields) {
+				for (TextField t : currentGroup.getTextFields()) {
 					if (!t.isInBounds(e.getX(), e.getY()))
 						t.unFocus();
 				}
@@ -93,7 +88,7 @@ public class Frame extends JFrame {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				for (Button b : buttons) {
+				for (Button b : currentGroup.getButtons()) {
 					if (b.isInBounds(e.getX(), e.getY())) {
 						b.setClicked(true);
 					}
@@ -116,14 +111,14 @@ public class Frame extends JFrame {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				for (Button b : buttons) {
+				for (Button b : currentGroup.getButtons()) {
 					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
 				}
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				for (Button b : buttons) {
+				for (Button b : currentGroup.getButtons()) {
 					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
 				}
 			}
@@ -133,15 +128,15 @@ public class Frame extends JFrame {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				if (e.getKeyChar() == '\t') {
-					for (int i = 0; i < textFields.size(); i++) {
-						if (textFields.get(i).write) {
-							textFields.get(i).write = false;
-							textFields.get((i + 1) % textFields.size()).write = true;
+					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
+						if (currentGroup.getTextFields().get(i).write) {
+							currentGroup.getTextFields().get(i).write = false;
+							currentGroup.getTextFields().get((i + 1) % currentGroup.getTextFields().size()).write = true;
 							break;
 						}
 					}
 				} else {
-					for (TextField t : textFields) {
+					for (TextField t : currentGroup.getTextFields()) {
 						t.input("" + e.getKeyChar());
 					}
 				}
@@ -217,9 +212,7 @@ public class Frame extends JFrame {
 	}
 	
 	public void showGroup(int i) {
-		this.drawables 	= groups.get(i).getDrawables();
-		this.buttons 	= groups.get(i).getButtons();
-		this.textFields	= groups.get(i).getTextFields();
+		currentGroup = groups.get(i);
 	}
 
 	public void draw() {
@@ -234,28 +227,11 @@ public class Frame extends JFrame {
 
 		g.clearRect(0, 0, getWidth(), getHeight());
 
-		for (Drawable d : drawables) {
-			d.draw(g);
-		}
+		currentGroup.draw(g);
 
 		g.dispose();
 
 		bs.show();
-	}
-
-	public void add(Drawable d) {
-		drawables.add(d);
-	}
-
-	public void add(Button b) {
-		buttons.add(b);
-		drawables.add(b);
-	}
-
-	public void add(TextField t) {
-		buttons.add(t);
-		drawables.add(t);
-		textFields.add(t);
 	}
 
 }
