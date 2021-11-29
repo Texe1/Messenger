@@ -303,7 +303,8 @@ public class Client {
 			chat = chats.get(chats.size()-1);
 		}
 		
-		chat.add(name + "\\" + msg);
+//		chat.add(name + "\\" + msg);
+		chat.add(msg);
 	}
 	
 	public String[][] getChats() {
