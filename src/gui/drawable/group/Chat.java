@@ -1,10 +1,11 @@
-package gui.drawable;
+package gui.drawable.group;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import gui.drawable.Text;
 import network.Client;
 
 public class Chat extends Group {
@@ -69,9 +70,6 @@ public class Chat extends Group {
 	@Override
 	public void draw(Graphics g) {
 		int y = r.height - 60;
-//		super.draw(g);
-
-		boolean calculated = messages.get(0).draw;
 
 		for (Text t : messages) {
 			t.draw = false;
@@ -81,8 +79,10 @@ public class Chat extends Group {
 				t.r.y = y;
 				t.draw = true;
 			}
-			t.draw(g);
+//			t.draw(g);
 		}
+		
+		super.draw(g);
 
 	}
 

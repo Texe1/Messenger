@@ -1,7 +1,11 @@
-package gui.drawable;
+package gui.drawable.group;
 
 import java.awt.Graphics;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import gui.drawable.Button;
+import gui.drawable.Drawable;
+import gui.drawable.TextField;
 
 public class Group extends Drawable{
 	protected CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
