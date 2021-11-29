@@ -2,6 +2,8 @@ package aes;
 
 import java.util.Random;
 
+
+
 public class KeySchedule {
 
 	public static String Key;
@@ -95,6 +97,45 @@ public class KeySchedule {
 			}
 
 		}
+	}
+	public static char multiplication(char a, char b) {	
+		char c = '\u0000';			
+		//Multiplication		
+		for (int i = 0; i < 8; i++) {
+			if((a & (1 << i)) != 0) {
+				c ^= (b<<i);
+			}
+		}
+		char p =  '\u011B';
+		//bit shift modulo 
+		for (int i = 14; i > 7; i--) {
+			if ((c & (1 << i)) != 0) {
+				c ^= (p << (i-8));
+			}				
+		}
+		return c;
+	}
+	
+	public static char[] mixColumns(char a,char b,char c,char d) {	
+		char[] e = new char[4];
+		e[0] ^=(KeySchedule.multiplication(a,'\u0002'))^(KeySchedule.multiplication(b,'\u0003'))^(c)^(d);
+		e[1] ^=(a)^(KeySchedule.multiplication(b,'\u0002'))^(KeySchedule.multiplication(c,'\u0003'))^(d);
+		e[2] ^=(a)^(b)^(KeySchedule.multiplication(c,'\u0002'))^(KeySchedule.multiplication(d,'\u0003'));
+		e[3] ^=(KeySchedule.multiplication(a,'\u0003'))^(b)^(c)^(KeySchedule.multiplication(d,'\u0002'));		
+
+		return e;
+	}
+	
+	
+	
+	public static char[] inverseMixColumns(char a,char b,char c,char d) {
+		char[] e = new char[4];
+		e[0] ^=(KeySchedule.multiplication(a,'\u000e'))^(KeySchedule.multiplication(b,'\u000b'))^(KeySchedule.multiplication(c,(char)13))^(KeySchedule.multiplication(d,'\u0009'));
+		e[1] ^=(KeySchedule.multiplication(a,'\u0009'))^(KeySchedule.multiplication(b,'\u000e'))^(KeySchedule.multiplication(c,'\u000b'))^(KeySchedule.multiplication(d,(char)13));
+		e[2] ^=(KeySchedule.multiplication(a,(char)13))^(KeySchedule.multiplication(b,'\u0009'))^(KeySchedule.multiplication(c,'\u000e'))^(KeySchedule.multiplication(d,'\u000b'));
+		e[3] ^=(KeySchedule.multiplication(a,'\u000b'))^(KeySchedule.multiplication(b,(char)13))^(KeySchedule.multiplication(c,'\u0009'))^(KeySchedule.multiplication(d,'\u000e'));		
+
+		return e;
 	}
 
 }

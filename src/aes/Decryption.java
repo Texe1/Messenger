@@ -1,5 +1,7 @@
 package aes;
 
+
+
 public class Decryption {
 
 	public static String decrypt(String s, String key) {
@@ -27,6 +29,16 @@ public class Decryption {
 						WorkChar[(j * 4) + j2] ^= KeySchedule.KeyWords[(4 * k) + j][j2];
 					}
 				}
+				
+				for (int j = 0; j < 4; j++) {
+					char[] e = new char[4];
+					e = KeySchedule.inverseMixColumns(WorkChar[j*4],WorkChar[(j*4)+1],WorkChar[(j*4)+2],WorkChar[(j*4)+3]);
+					WorkChar[j*4]     = e[0];
+					WorkChar[(j*4)+1] = e[1];
+					WorkChar[(j*4)+2] = e[2];
+					WorkChar[(j*4)+3] = e[3];
+				}
+				
 				// Reverse Permutation
 				c = WorkChar[3];
 				WorkChar[3] = WorkChar[7];
