@@ -53,7 +53,7 @@ public class KeySchedule {
 				KeyWords[i][j] = KeyText.charAt((i * 4) + j);
 			}
 		}
-		int[] RoundConstant = new int[] {1,2,4,8,16,32,64,128,27,54};
+		char[] RoundConstant = new char[] {'\u0001','\u0002','\u0004','\u0008','\u0010','\u0020','\u0040','\u0080','\u001B','\u0036'};
 		String Text = "";
 		String[] ZwischenText = new String[2];
 		char c;
@@ -88,7 +88,7 @@ public class KeySchedule {
 
 					KeyWords[i][j] ^= KeyWords[i - 4][j];
 				}
-				KeyWords[i][0] ^= (char)(RoundConstant[(i/4)-1]);
+				KeyWords[i][0] ^= RoundConstant[(i/4)-1];
 			} else {
 
 				for (int j = 0; j < 4; j++) {
