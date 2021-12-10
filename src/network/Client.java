@@ -199,16 +199,15 @@ public class Client {
 					}
 
 					String msg = Decryption.decrypt(encrMsg, keyBinStr);
-
-					System.out.println("Message by '" + origin + "': \n" + msg);
 					
+					System.out.println(msg);
 					addToChat(origin, msg);
 
 				} else if (s.startsWith("mp")) {
 					if (s.contains("\\") && !s.substring(2).startsWith("\\")) {
 						String name = s.substring(2, s.indexOf('\\'));
 						String msg = s.substring(s.indexOf('\\') + 1);
-						System.out.println("message from <" + name + ">\n\t" + msg);
+						System.out.println(msg);
 						addToChat(name, msg);
 					} else {
 						s = s.substring(2);
@@ -252,15 +251,14 @@ public class Client {
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
 		
+
+		System.out.println(name);
+		
 		return chats.get(chats.size() -1);
 	}
 
 	public ArrayList<String> beginChat(String name) {
-		chats.add(new ArrayList<String>());
-		chats.get(chats.size() - 1).add(name);
-		chats.get(chats.size() - 1).add("");
-		
-		return chats.get(chats.size() -1);
+		return beginChat(name, "");
 	}
 
 	public void encryptChat(String name, String encryption) {
@@ -284,10 +282,10 @@ public class Client {
 			chat = beginChat(name, "aes");
 		}
 
-		String s = "mp";
+		String s = "me";
 
 		if (chat.get(1).equals("")) {
-			s = "me";
+			s = "mp";
 		}
 
 		s += name + "\\" + chat.get(1) + msg;
@@ -300,7 +298,6 @@ public class Client {
 	}
 
 	public void addToChat(String name, String msg) {
-		System.out.println(name);
 		ArrayList<String> chat = null;
 		for (ArrayList<String> c : chats) {
 			if (c.get(0).equals(name)) {

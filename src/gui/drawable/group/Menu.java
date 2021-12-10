@@ -8,33 +8,30 @@ import gui.drawable.Button;
 
 public class Menu extends Group{
 	
-	Rectangle r;
-	
-	Frame f;
-	
-	public Menu(int x, int y, int width, int height, Frame f) {
-		this.r = new Rectangle(x, y, width, height);
-		this.f = f;
-		
-		update();
+	public Menu(Frame f) {
+		super(0f, 0f, 1f, 1f);
+		setCoordType(2, CoordType.REL);
+		setCoordType(3, CoordType.REL);
+		update(f, f.getBounds());
 	}
 	
 	@Override
-	public void update() {
-		int y = r.y;
+	public void update(Frame frame, Rectangle r) {
+		super.update(frame, r);
+		float y = getCoords()[1] + 100;
 		
 		this.buttons = new CopyOnWriteArrayList<>();
 		this.drawables = new CopyOnWriteArrayList<>();
 		
-		for (int i = 0; i < f.getGroups().size(); i++) {
-			Group group = f.getGroups().get(i);
+		for (int i = 0; i < frame.getGroups().size(); i++) {
+			Group group = frame.getGroups().get(i);
 			
-			MenuButton b = new MenuButton(r.x, y, r.width, 40, i, group.name) {
+			MenuButton b = new MenuButton(y, group.name, i) {
 				
 				@Override
 				public void run() {
-					f.showGroup(i);
-					f.getGroups().get(i).update();
+					frame.showGroup(i);
+					frame.update();
 				}
 			};
 			
@@ -42,6 +39,8 @@ public class Menu extends Group{
 			
 			b.edgeRadius = 0;
 			
+			b.setText(group.name);
+			b.update(frame, absoluteCoords);
 			this.add(b);
 			
 		}
@@ -51,8 +50,9 @@ public class Menu extends Group{
 		
 		int i;
 		
-		public MenuButton(int x, int y, int width, int height, int i, String name) {
-			super(x, y, width, height);
+		public MenuButton(float y, String name, int i) {
+			super(0f, y, 1f, 40f);
+			setCoordType(2, CoordType.REL);
 			
 			this.text = name;
 			this.i = i;

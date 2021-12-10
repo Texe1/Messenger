@@ -1,8 +1,10 @@
 package gui.drawable;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class TextField extends Button {
 
@@ -30,6 +32,11 @@ public class TextField extends Button {
 		this.maxChars = maxChars;
 		this.defaultText = defaultText;
 	}
+	
+	public TextField(float x, float y, float width, float height) {
+		super(x, y, width, height);
+		changeFontsize(20);
+	}
 
 	public boolean write = false;
 	
@@ -45,22 +52,31 @@ public class TextField extends Button {
 	@Override
 	public void draw(Graphics g) {
 
-		g.setColor(color[focussed ? (clicked ? 2 : 1) : 0]);
-
-		g.fillRoundRect(x, y, width, height, 10, 10);
+		Graphics2D g2 = (Graphics2D) g;
 		
-		g.setFont(f);
+		g2.setColor(color[focussed ? (clicked ? 2 : 1) : write ? 1 : 0]);
+		g2.fillRoundRect(absoluteCoords.x, absoluteCoords.y, absoluteCoords.width, absoluteCoords.height, 10, 10);
+		
+		if(write) {
+			g2.setColor(color[2]);
+			g2.setStroke(new BasicStroke(2));
+			g2.drawRoundRect(absoluteCoords.x, absoluteCoords.y, absoluteCoords.width, absoluteCoords.height, edgeRadius, edgeRadius);
+			g2.setStroke(new BasicStroke(1));
+		}
+		
+		g2.setFont(f);
 		if(text.isEmpty()) {
-			g.setColor(Color.GRAY);
-			g.drawString(defaultText, x + (f.getSize()/2), y + (height+f.getSize())/2);
+			g2.setColor(Color.GRAY);
+			g2.drawString(defaultText, absoluteCoords.x + (f.getSize()/2), absoluteCoords.y + (absoluteCoords.height+f.getSize())/2);
 		}
-		g.setColor(Color.BLACK);
-		int textWidth = g.getFontMetrics(f).stringWidth(text);
-		while(textWidth > width-f.getSize()) {
-			text = text.substring(0, text.length()-1);
-			textWidth = g.getFontMetrics(f).stringWidth(text);
+		g2.setColor(Color.BLACK);
+		int textWidth = g2.getFontMetrics(f).stringWidth(text);
+		while(textWidth > absoluteCoords.width-f.getSize()) {
+			if(text.length() > 0 ) text = text.substring(0, text.length()-1);
+			else break;
+			textWidth = g2.getFontMetrics(f).stringWidth(text);
 		}
-		g.drawString(text, x+(f.getSize()/2), y + (height+f.getSize())/2);
+		g2.drawString(text, absoluteCoords.x+(f.getSize()/2), absoluteCoords.y + (absoluteCoords.height+f.getSize())/2);
 	}
 
 	public void input(String s) {
@@ -72,9 +88,18 @@ public class TextField extends Button {
 		}
 	}
 	
+	public void setPermittedChars(String s) {
+		permittedChars = s.toCharArray();
+	}
+	
+	public void addPermittedChar(char c) {
+		permittedChars = (String.valueOf(permittedChars) + c).toCharArray();
+	}
+	
 	public void input(char c) {
 		if (!write)
 			return;
+
 		if(c == 8) {
 			if(text.length() > 0)
 				text = text.substring(0, text.length() - 1);
@@ -84,7 +109,7 @@ public class TextField extends Button {
 			while (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
 				text = text.substring(0, text.length() - 1);
 			}
-		}else if(text.length() < maxChars){
+		}else if(text.length() < maxChars || maxChars == 0){
 			if(permittedChars.length > 0) {
 				for (char d : permittedChars) {
 					if(c == d) {

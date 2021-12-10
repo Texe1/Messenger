@@ -4,34 +4,34 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
 public class Text extends Drawable {
-	private String s;
-	private Font f;
-	public Rectangle r = new Rectangle();
+	protected Font f = new Font(Font.MONOSPACED, Font.PLAIN, 20);
+	protected Color fontColor = Color.BLACK;
 
-	public int maxWidth = 0;
-	public Color bgColor;
+	public Color bgColor = null;
 
-	public Text(String s, int fontSize, Point pos) {
+	public Text(String s, int fontSize, int x, int y) {
+		super(x, y, 0, 0);
 		this.s = s;
 		f = new Font(Font.MONOSPACED, Font.PLAIN, fontSize);
 	}
 
-	public Text(String s, int fontSize, int x, int y) {
+	public Text(float x, float y, float width, float height) {
+		super(x, y, width, height);
+	}
+
+	public Text(String s, float x, float y, float width, float height) {
+		super(x, y, width, height);
 		this.s = s;
-		f = new Font(Font.MONOSPACED, Font.PLAIN, fontSize);
-		r.x = x;
-		r.y = y;
 	}
 
 	@Override
 	public void draw(Graphics g) {
 		g.setFont(f);
-		if (maxWidth != 0) {
+		if (absoluteCoords.width != 0) {
 			String line = "";
 			FontMetrics fm = g.getFontMetrics();
 			ArrayList<String> lines = new ArrayList<>();
@@ -39,12 +39,12 @@ public class Text extends Drawable {
 
 			for (int i = 0; i < words.length; i++) {
 				String testS = line + words[i];
-				if (fm.stringWidth(testS) > maxWidth) {
+				if (fm.stringWidth(testS) > absoluteCoords.width) {
 					lines.add(line);
 					line = words[i];
-					while (fm.stringWidth(line) > maxWidth) {
-						lines.add(line.substring(0, Math.floorDiv(maxWidth, 12)));
-						line = line.substring(Math.floorDiv(maxWidth, 12));
+					while (fm.stringWidth(line) > absoluteCoords.width) {
+						lines.add(line.substring(0, Math.floorDiv(absoluteCoords.width, 12)));
+						line = line.substring(Math.floorDiv(absoluteCoords.width, 12));
 
 						if (line.isBlank() && ++i < words.length)
 							line = words[i];
@@ -55,25 +55,38 @@ public class Text extends Drawable {
 			}
 
 			lines.add(line);
-
-			r = new Rectangle(r.x, r.y, maxWidth, lines.size()*30 +10);
+			absoluteCoords = new Rectangle(absoluteCoords.x, absoluteCoords.y, absoluteCoords.width,
+					lines.size() * 30 + 10);
 			
+
 			if (draw) {
-				int y = r.y;
-				g.setColor(bgColor);
-				g.fillRoundRect(r.x, r.y-30, r.width, r.height, 10, 10);
-				g.setColor(Color.BLACK);
+				int y = absoluteCoords.y + f.getSize() * 3 / 2;
+				if (bgColor != null) {
+					g.setColor(bgColor);
+					g.fillRoundRect(absoluteCoords.x, absoluteCoords.y, absoluteCoords.width, absoluteCoords.height, 10,
+							10);
+				}
+				g.setColor(fontColor);
 				for (String s : lines) {
-					g.drawString(s, r.x, y);
-					y += 30;
+					g.drawString(s, absoluteCoords.x, y);
+					y += f.getSize() * 3 / 2;
 				}
 			}
 
 			return;
 		}
-		if(!draw) return;
-		g.setColor(Color.BLACK);
+		if (!draw)
+			return;
+		g.setColor(fontColor);
 		g.setFont(f);
-		g.drawString(s, r.x, r.y);
+		g.drawString(s, absoluteCoords.x+10, absoluteCoords.y + f.getSize() * 3 / 2);
+	}
+
+	public void setText(String s) {
+		this.s = s;
+	}
+
+	public void setFontColor(Color c) {
+		fontColor = c;
 	}
 }

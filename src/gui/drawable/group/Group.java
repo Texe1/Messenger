@@ -1,16 +1,34 @@
 package gui.drawable.group;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import gui.Frame;
 import gui.drawable.Button;
 import gui.drawable.Drawable;
 import gui.drawable.TextField;
 
 public class Group extends Drawable{
+	
 	protected CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<Button> buttons = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<TextField> textFields = new CopyOnWriteArrayList<>();
+	
+	protected Dimension minSize = new Dimension(0, 0);
+	
+	public Group() {
+		super(.05f, .05f, .9f, .9f);
+		setCoordType(0, CoordType.REL);
+		setCoordType(1, CoordType.REL);
+		setCoordType(2, CoordType.REL);
+		setCoordType(3, CoordType.REL);
+	}
+	
+	public Group(float x, float y, float width, float height) {
+		super(x, y, width, height);
+	}
 	
 	public String name = "Anonymus";
 	
@@ -48,5 +66,11 @@ public class Group extends Drawable{
 		}
 	}
 	
-	public void update() {}
+	@Override
+	public void update(Frame f, Rectangle r) {
+		super.update(f, r);
+		for (Drawable d : drawables) {
+			d.update(f, this.absoluteCoords);
+		}
+	}
 }

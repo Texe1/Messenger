@@ -3,6 +3,7 @@ package gui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -11,17 +12,16 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JFrame;
 
 import gui.drawable.Button;
-import gui.drawable.Text;
 import gui.drawable.TextField;
 import gui.drawable.group.Chat;
 import gui.drawable.group.Group;
+import gui.drawable.group.MainPage;
 import gui.drawable.group.Menu;
 import network.Client;
 
@@ -32,14 +32,9 @@ public class Frame extends JFrame {
 	private CopyOnWriteArrayList<Group> groups = new CopyOnWriteArrayList<>();
 	private Group currentGroup;
 
-	private TextField tf_hostIP;
-	private TextField tf_port;
-	private TextField tf_name;
-	
-
 	private Menu menu;
-	
-	private Client client;
+
+	public Client client;
 
 	private int drawCycle = 0; // updates at 100 cycles of drawing
 
@@ -183,69 +178,17 @@ public class Frame extends JFrame {
 		this.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
 		setVisible(true);
-		
+
 		this.client = client;
 
-		menu = new Menu(0, 100, 200, 1000, this);
+		menu = new Menu(this);
 
-		Group mainPage = new Group();
-
-		tf_hostIP = new TextField(300, 100, 700, 40);
-		tf_hostIP.defaultText = "host IP";
-		mainPage.add(tf_hostIP);
-
-		mainPage.add(new Text(":", 20, 1010, 125));
-
-		tf_port = new TextField(1032, 100, 20, 4, "port");
-		tf_port.permittedChars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-		mainPage.add(tf_port);
-
-		tf_name = new TextField(300, 150, 800, 40);
-		tf_name.defaultText = "name";
-		mainPage.add(tf_name);
-
-		Button b = new Button(650, 200, 100, 40) {
-
-			@Override
-			public void run() {
-				if (client.connected) {
-					client.disconnect();
-					this.setText("disconnect");
-				} else {
-					if (tf_hostIP.getText().isBlank() || tf_port.getText().isBlank() || tf_name.getText().isBlank())
-						return;
-
-					System.out.println(tf_hostIP.getText());
-					client.connect(tf_hostIP.getText(), Integer.parseInt(tf_port.getText()), tf_name.getText());
-					if (client.connected)
-						this.setText("connect");
-				}
-			}
-		};
-		b.setText("connect");
-
-		mainPage.add(b);
-
-		mainPage.name = "connection";
+		Group mainPage = new MainPage(this);
 
 		groups.add(mainPage);
 		showGroup(0);
 
-//		c.beginChat("Hello");
-//		c.addToChat("Hello", "\\Test, test, test!");
-//		c.addToChat("Hello", "Hello\\Test, test, test!");
-//
-//		Chat chat = new Chat(c, 250, 100, 750, 800, "Hello");
-//		add(chat);
-//
-//		c.beginChat("Bye");
-//		c.addToChat("Bye", "\\Bye, test, test!");
-//		c.addToChat("Bye", "Bye\\Bye, test, test!");
-//
-//		Chat chat2 = new Chat(c, 250, 100, 750, 800, "Bye");
-//		add(chat2);
-
-		menu.update();
+		menu.update(this, new Rectangle(200, this.getHeight()));
 
 		createBufferStrategy(3);
 
@@ -272,32 +215,31 @@ public class Frame extends JFrame {
 
 	public void add(Group g) {
 		groups.add(g);
-		menu.update();
+		menu.update(this, new Rectangle(200, this.getHeight()));
 	}
 
 	public void update() {
-		
 		for (Group group : groups) {
-			group.update();
+			group.update(this, new Rectangle(250, 0, this.getWidth()-300, this.getHeight()));
 		}
-		
-		if(!client.receivedContacts) return;
-		
+
+		if (!client.receivedContacts)
+			return;
+
 		client.receivedContacts = false;
-		
+
 		Group mainPage = getGroups().get(0);
-		
+
 		groups = new CopyOnWriteArrayList<>();
-		
+
 		groups.add(mainPage);
-		
+
 		String[] contacts = client.getContacts();
-		
+
 		for (String name : contacts) {
-			add(new Chat(client, 250, 100, 750, 600, name));
+			add(new Chat(client, name));
 		}
-		System.out.println("Why?");
-		menu.update();
+		menu.update(this, new Rectangle(200, this.getHeight()));
 	}
 
 	public void draw() {
@@ -307,9 +249,15 @@ public class Frame extends JFrame {
 			createBufferStrategy(3);
 			return;
 		}
-
-		Graphics g = bs.getDrawGraphics();
-
+		Graphics g;
+		
+		try {
+			g = bs.getDrawGraphics();
+		} catch (IllegalStateException ise) {
+			ise.printStackTrace();
+			return;
+		}
+		
 		g.clearRect(0, 0, getWidth(), getHeight());
 
 		currentGroup.draw(g);
@@ -320,7 +268,7 @@ public class Frame extends JFrame {
 		drawCycle %= 100;
 		update();
 		if (drawCycle == 0) {
-			
+
 		}
 
 		g.dispose();
