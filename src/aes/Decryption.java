@@ -1,7 +1,6 @@
 package aes;
 
 
-
 public class Decryption {
 
 	public static String decrypt(String s, String key) {
@@ -9,8 +8,6 @@ public class Decryption {
 		KeySchedule.keySchedule(key);
 
 		char[] WorkChar = new char[16];
-		String Text = "";
-		String[] ZwischenText = new String[2];
 		char c;
 		String OutputString = "";
 //		String[] EingabeText = new String[s.length()];
@@ -61,23 +58,11 @@ public class Decryption {
 				// Reverse Substitution
 
 				for (int j = 0; j < 16; j++) {
-
-					String BinaryBit = "" + Integer.toBinaryString(WorkChar[j]);
-					while (BinaryBit.length() < 8) {
-						BinaryBit = "0" + BinaryBit;
+					int z = 0;
+					while (WorkChar[j] != KeySchedule.SubstitutionMap1[z]) {
+						z++;
 					}
-					ZwischenText = BinaryBit.split("(?<=\\G.{4})");
-
-					for (int g = 0; g < 2; g++) {
-						Text = Integer
-								.toBinaryString(KeySchedule.SubstitutionMap2[Integer.parseInt(ZwischenText[g], 2)]);
-						while (Text.length() < 4) {
-							Text = "0" + Text;
-						}
-						ZwischenText[g] = Text;
-					}
-					WorkChar[j] = (char) Integer.parseInt((ZwischenText[0] + ZwischenText[1]), 2);
-
+					WorkChar[j] = (char)z;		
 				}
 
 			}

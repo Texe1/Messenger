@@ -1,7 +1,5 @@
 package aes;
 
-
-
 public class Encryption {
 
 	public static String encrypt(String s) {
@@ -13,8 +11,7 @@ public class Encryption {
 		}
 
 		char[] WorkChar = new char[16];
-		String Text = "";
-		String[] ZwischenText = new String[2];
+		
 		char c;
 		String OutputString = "";
 
@@ -32,21 +29,7 @@ public class Encryption {
 				for (int j = 0; j < 16; j++) {
 
 					// Substitution
-					String BinaryBit = "" + Integer.toBinaryString(WorkChar[j]);
-					while (BinaryBit.length() < 8) {
-						BinaryBit = "0" + BinaryBit;
-					}
-					ZwischenText = BinaryBit.split("(?<=\\G.{4})");
-
-					for (int g = 0; g < 2; g++) {
-						Text = Integer
-								.toBinaryString(KeySchedule.SubstitutionMap1[Integer.parseInt(ZwischenText[g], 2)]);
-						while (Text.length() < 4) {
-							Text = "0" + Text;
-						}
-						ZwischenText[g] = Text;
-					}
-					WorkChar[j] = (char) Integer.parseInt((ZwischenText[0] + ZwischenText[1]), 2);
+					WorkChar[j]=KeySchedule.SubstitutionMap1[Integer.valueOf(WorkChar[j])];	
 				}
 
 				// Permutation
