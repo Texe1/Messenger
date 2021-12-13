@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-import gui.Frame;
+import gui.general.Frame;
 import network.Client;
 import network.Server;
 

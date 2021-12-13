@@ -1,6 +1,7 @@
-package gui;
+package gui.general;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
@@ -175,6 +176,8 @@ public class Frame extends JFrame {
 			}
 		});
 
+		this.setMinimumSize(new Dimension(510, 400));
+		
 		this.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
 		setVisible(true);
@@ -220,7 +223,7 @@ public class Frame extends JFrame {
 
 	public void update() {
 		for (Group group : groups) {
-			group.update(this, new Rectangle(250, 0, this.getWidth()-300, this.getHeight()));
+			group.update(this, new Rectangle(200, 0, this.getWidth()-200, this.getHeight()));
 		}
 
 		if (!client.receivedContacts)
@@ -273,7 +276,12 @@ public class Frame extends JFrame {
 
 		g.dispose();
 
-		bs.show();
+		try {
+			bs.show();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 	}
 
 }

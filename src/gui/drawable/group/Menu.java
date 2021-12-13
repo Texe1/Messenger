@@ -3,8 +3,8 @@ package gui.drawable.group;
 import java.awt.Rectangle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import gui.Frame;
 import gui.drawable.Button;
+import gui.general.Frame;
 
 public class Menu extends Group{
 	

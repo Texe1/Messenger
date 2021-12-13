@@ -3,10 +3,10 @@ package gui.drawable.group;
 import java.awt.Color;
 import java.awt.Rectangle;
 
-import gui.Frame;
 import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
+import gui.general.Frame;
 
 public class MainPage extends Group{
 	
@@ -16,26 +16,25 @@ public class MainPage extends Group{
 	
 	public MainPage(Frame f) {
 		super();
-		this.setCoords(.05f, .05f, .9f, .9f);
 		this.setCoordType(2, CoordType.REL);
 		this.setCoordType(3, CoordType.REL);
 		this.absoluteCoords = new Rectangle(100, 0, 0, 0);
 		this.frame = f;
 		
-		tf_hostIP = new TextField(.0f, 100.0f, 110.0f, 40.0f);
+		tf_hostIP = new TextField(.0f, 100.0f, 100.0f, 40.0f);
 		tf_hostIP.setCoordType(2, CoordType.DIST);
 		tf_hostIP.defaultText = "host IP";
 		
 		add(tf_hostIP);
 
-		Text t = new Text(":", 110.0f, 100.0f, .0f, .0f);
+		Text t = new Text(":", 100.0f, 100.0f, .0f, .0f);
 		t.setCoordType(0, CoordType.DIST);
 		t.setFontColor(Color.LIGHT_GRAY);
 		t.bgColor = null;
 		
 		add(t);
 		
-		tf_port = new TextField(80f, 100f, 10f, 40f);
+		tf_port = new TextField(70f, 100f, 0f, 40f);
 		tf_port.defaultText = "port";
 		tf_port.setCoordType(0, CoordType.DIST);
 		tf_port.setCoordType(2, CoordType.DIST);
@@ -43,7 +42,7 @@ public class MainPage extends Group{
 		
 		add(tf_port);
 
-		tf_name = new TextField(.0f, 150f, 10f, 40f);
+		tf_name = new TextField(.0f, 150f, 0f, 40f);
 		tf_name.setCoordType(2, CoordType.DIST);
 		tf_name.defaultText = "name";
 		add(tf_name);

@@ -5,10 +5,10 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import gui.Frame;
 import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
+import gui.general.Frame;
 import network.Client;
 
 public class Chat extends Group {

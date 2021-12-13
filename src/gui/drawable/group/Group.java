@@ -5,10 +5,10 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import gui.Frame;
 import gui.drawable.Button;
 import gui.drawable.Drawable;
 import gui.drawable.TextField;
+import gui.general.Frame;
 
 public class Group extends Drawable{
 	
@@ -19,7 +19,7 @@ public class Group extends Drawable{
 	protected Dimension minSize = new Dimension(0, 0);
 	
 	public Group() {
-		super(.05f, .05f, .9f, .9f);
+		super(.025f, .025f, .95f, .95f);
 		setCoordType(0, CoordType.REL);
 		setCoordType(1, CoordType.REL);
 		setCoordType(2, CoordType.REL);

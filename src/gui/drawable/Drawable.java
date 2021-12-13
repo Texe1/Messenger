@@ -3,7 +3,7 @@ package gui.drawable;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
-import gui.Frame;
+import gui.general.Frame;
 
 public abstract class Drawable {
 	boolean dead = false;
