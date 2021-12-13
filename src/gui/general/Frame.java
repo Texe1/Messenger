@@ -164,7 +164,6 @@ public class Frame extends JFrame {
 						t.input("" + e.getKeyChar());
 					}
 				}
-
 			}
 
 			@Override
@@ -173,6 +172,25 @@ public class Frame extends JFrame {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == 37) {
+					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
+						if (currentGroup.getTextFields().get(i).write) {
+							currentGroup.getTextFields().get(i).moveCusorBack(false);
+							break;
+						}
+					}
+					return;
+				}
+				if(e.getKeyCode() == 39) {
+					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
+						if (currentGroup.getTextFields().get(i).write) {
+							currentGroup.getTextFields().get(i).moveCusorForwards(false);
+							System.out.println("39");
+							break;
+						}
+					}
+					return;
+				}
 			}
 		});
 
