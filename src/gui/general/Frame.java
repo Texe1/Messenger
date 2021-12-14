@@ -175,7 +175,7 @@ public class Frame extends JFrame {
 				if(e.getKeyCode() == 37) {
 					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
 						if (currentGroup.getTextFields().get(i).write) {
-							currentGroup.getTextFields().get(i).moveCusorBack(false);
+							currentGroup.getTextFields().get(i).moveCusorBack(e.isControlDown(), e.isShiftDown());
 							break;
 						}
 					}
@@ -184,8 +184,7 @@ public class Frame extends JFrame {
 				if(e.getKeyCode() == 39) {
 					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
 						if (currentGroup.getTextFields().get(i).write) {
-							currentGroup.getTextFields().get(i).moveCusorForwards(false);
-							System.out.println("39");
+							currentGroup.getTextFields().get(i).moveCusorForwards(e.isControlDown(), e.isShiftDown());
 							break;
 						}
 					}

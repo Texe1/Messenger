@@ -2,12 +2,10 @@ package gui.drawable;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 
 public abstract class Button extends Text{
 	protected boolean focussed = false, clicked = false;
 	
-//	public int x, y, width, height;
 	public int edgeRadius = 10;
 	
 	protected String text = "";
@@ -46,16 +44,11 @@ public abstract class Button extends Text{
 	}
 	
 	public abstract void run();
-	
-	@Override
-	public void draw(Graphics g) {
-		super.draw(g);
-	}
 
 	public boolean isFocussed() {
 		return focussed;
 	}
-
+	
 	public void setFocussed(boolean focussed) {
 		this.focussed = focussed;
 		this.bgColor = color[focussed ? (clicked ? 2 : 1) : 0];

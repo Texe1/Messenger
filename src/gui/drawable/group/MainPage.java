@@ -65,18 +65,11 @@ public class MainPage extends Group{
 		};
 
 		b.setCoordType(0, CoordType.DISTMID);
-//		b.setCoordType(2, CoordType.DIST);
 		b.setText("connect");
 
 		add(b);
 
 		this.name = "connection";
-	}
-	
-	@Override
-	public void update(Frame f, Rectangle r) {
-		super.update(f, r);
-//		System.out.println(absoluteCoords.x);
 	}
 	
 }

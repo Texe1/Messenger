@@ -12,7 +12,8 @@ public class TextField extends Button {
 
 	public String defaultText = "";
 
-	private int cursor = 0;
+	private int cursor = -1;
+	private int selectionOrigin = 0; // where the user began pressing shift
 
 	private Font f = new Font(Font.MONOSPACED, Font.PLAIN, 20);
 
@@ -76,9 +77,7 @@ public class TextField extends Button {
 		g2.setColor(Color.BLACK);
 		int textWidth = g2.getFontMetrics(f).stringWidth(text);
 		while (textWidth > absoluteCoords.width - f.getSize()) {
-			if (text.length() > 0)
-				text = text.substring(0, text.length() - 1);
-			else
+			if (text.length() == 0)
 				break;
 			textWidth = g2.getFontMetrics(f).stringWidth(text);
 		}
@@ -88,10 +87,18 @@ public class TextField extends Button {
 
 		g2.setColor(fontColor);
 		g2.drawString(text, X, Y);
-		g2.setColor(Color.DARK_GRAY);
-		if (!text.isBlank() && cursor <= text.length() && cursor > 0)
-			g2.drawString("" + text.charAt(cursor - 1),
-					X + g2.getFontMetrics().stringWidth(text.substring(0, cursor - 1)), Y);
+		if (!text.isBlank() && cursor < text.length() && cursor >= 0) {
+			if(cursor != selectionOrigin) {
+				float[] hsb = Color.RGBtoHSB(70, 70, 255, null);
+				g2.setColor(Color.getHSBColor(hsb[0], hsb[1], hsb[1]));
+				g2.drawString(text.substring(cursor < selectionOrigin ? cursor : selectionOrigin, (cursor > selectionOrigin ? cursor : selectionOrigin)+1), 
+						X + g2.getFontMetrics().stringWidth(text.substring(0, cursor < selectionOrigin ? cursor : selectionOrigin)), Y);
+				System.out.println(cursor + ", " + selectionOrigin);
+			}
+			g2.setColor(Color.BLUE);
+			g2.drawString("" + text.charAt(cursor), 
+					X + g2.getFontMetrics().stringWidth(text.substring(0, cursor)), Y);
+		}
 	}
 
 	public void setPermittedChars(String s) {
@@ -113,69 +120,124 @@ public class TextField extends Button {
 
 	public void input(char c) {
 
-		if (cursor > text.length())
-			cursor = text.length();
-		if (cursor < 1 && text.length() > 0)
-			cursor = 1;
-		else if (cursor < 0 && text.length() == 0)
+		System.out.println(cursor);
+
+		if (cursor >= text.length())
+			cursor = text.length() - 1;
+		else if (cursor < 0)
 			cursor = 0;
+
+		if (text.length() == 0)
+			cursor = -1;
+
+		System.out.println(cursor);
 
 		if (!write)
 			return;
 
 		if (c == 8) {
 			if (text.length() > 0) {
-				text = text.substring(0, cursor - 1) + (cursor < text.length() - 1 ? text.substring(cursor) : "");
-				cursor--;
+				if(cursor > selectionOrigin) {
+					int i = cursor;
+					cursor = selectionOrigin;
+					selectionOrigin = i;
+				}
+				text = text.substring(0, cursor) + (selectionOrigin < text.length() - 1 ? text.substring(selectionOrigin + 1) : "");
+				
+				selectionOrigin = --cursor;
 			}
 		} else if (c == 127) {
 			if (text.length() > 0) {
-				text = text.substring(0, cursor - 1) + (cursor < text.length() - 1 ? text.substring(cursor) : "");
+				if(cursor > selectionOrigin) {
+					int i = cursor;
+					cursor = selectionOrigin;
+					selectionOrigin = i;
+				}
+				if(cursor == selectionOrigin) {
+					text = text.substring(0, cursor) + (cursor < text.length() - 1 ? text.substring(cursor + 1) : "");
+				} else{
+					text = text.substring(0, cursor) + (selectionOrigin < text.length() - 1 ? text.substring(selectionOrigin + 1) : "");
+				}
+				
 				cursor--;
-			}
-			while (cursor > 0 && text.charAt(cursor-1) != ' ') {
-				text = text.substring(0, cursor - 1) + (cursor < text.length() - 1 ? text.substring(cursor) : "");
-				cursor--;
-			}
-			while (cursor > 0 && text.charAt(cursor-1) == ' ') {
-				text = text.substring(0, cursor - 1) + (cursor < text.length() - 1 ? text.substring(cursor) : "");
-				cursor--;
+				
+				while (cursor >= 0 && text.charAt(cursor) == ' ') {
+					text = text.substring(0, cursor) + (cursor < text.length() - 1 ? text.substring(cursor + 1) : "");
+					cursor--;
+				}
+				while (cursor >= 0 && text.charAt(cursor) != ' ') {
+					text = text.substring(0, cursor) + (cursor < text.length() - 1 ? text.substring(cursor + 1) : "");
+					cursor--;
+				}
+				
+				selectionOrigin = cursor;
 			}
 		} else {
-			System.out.println((int) c);
 			if (text.length() < maxChars || maxChars == 0) {
 				if (permittedChars.length > 0) {
 					for (char d : permittedChars) {
 						if (c == d) {
-							text = text.substring(0, cursor) + c + text.substring(cursor);
-							cursor++;
+							text = text.substring(0, cursor + 1) + c
+									+ (cursor < text.length() - 1 ? text.substring(cursor + 1) : "");
+							selectionOrigin = ++cursor;
 							break;
 						}
 					}
 				} else {
-					text = text.substring(0, cursor) + c + text.substring(cursor);
-					cursor++;
+					if (text.length() > 0)
+						text = text.substring(0, cursor + 1) + c
+								+ (cursor < text.length() - 1 ? text.substring(cursor + 1) : "");
+					else
+						text = "" + c;
+					selectionOrigin = ++cursor;
 				}
 			}
 		}
 	}
 
-	public void moveCusorForwards(boolean crtl) {
+	public void moveCusorForwards(boolean crtl, boolean shift) {
 		if (!crtl) {
-			System.out.println(cursor);
-			if (cursor < text.length()) {
+			if (cursor < text.length()-1) {
 				cursor++;
-				System.out.println(cursor);
 			}
-			return;
+		}else {
+			if (cursor < text.length()) {
+					cursor++;
+				while (cursor < text.length() && text.charAt(cursor) == ' ') {
+					cursor++;
+				}
+				while (cursor < text.length() && text.charAt(cursor) != ' ') {
+					cursor++;
+				}
+				cursor--;
+			}
+		}
+		if (!shift) {
+			selectionOrigin = cursor;
 		}
 	}
 
-	public void moveCusorBack(boolean crtl) {
+	public void moveCusorBack(boolean crtl, boolean shift) {
 		if (!crtl) {
-			if (cursor > 1 || (cursor > 0 && text.length() == 0))
+			if (cursor > 0) {
 				cursor--;
-			return;
+			}
+		} else {
+			if (cursor > 0 || (cursor > 0 && text.length() == 0)) {
+				if (cursor >= 0) {
+					cursor--;
+				}
+				while (cursor >= 0 && text.charAt(cursor) == ' ') {
+					cursor--;
+				}
+				while (cursor >= 0 && text.charAt(cursor) != ' ') {
+					cursor--;
+				}
+				cursor++;
+			}
+		}
+		if (!shift) {
+			selectionOrigin = cursor;
 		}
 	}
 

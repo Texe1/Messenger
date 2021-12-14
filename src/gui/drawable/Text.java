@@ -13,6 +13,8 @@ public class Text extends Drawable {
 
 	public Color bgColor = null;
 
+	public boolean isCentered = false;
+
 	public Text(String s, int fontSize, int x, int y) {
 		super(x, y, 0, 0);
 		this.s = s;
@@ -68,7 +70,8 @@ public class Text extends Drawable {
 				}
 				g.setColor(fontColor);
 				for (String s : lines) {
-					g.drawString(s, absoluteCoords.x, y);
+					int sWidth = g.getFontMetrics().stringWidth(s);
+					g.drawString(s, absoluteCoords.x + (absoluteCoords.width - sWidth-10)/2, y);
 					y += f.getSize() * 3 / 2;
 				}
 			}
