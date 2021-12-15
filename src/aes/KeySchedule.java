@@ -46,19 +46,11 @@ public class KeySchedule {
 	public static void keySchedule(String key) {
 
 		String KeyText = "";
-		String[] split = new String[(key.length() / 8) + 1];
-		for (int i = 0; i < (key.length() / 8); i++) {
-			split = key.split("(?<=\\G.{8})");
-		}
-
-		int Z = 0;
-		for (int i = 0; i < split.length; i++) {
-			Z = Integer.parseInt(split[i], 2);
-			KeyText += ((char) Z);
-		}
-//		System.out.println("128bit-Key:");
-//		System.out.println(key);
-//		 System.out.println(KeyText);
+		for (int i = 0; i < Key.length()/8; i++) {
+			int Z =0;
+			Z = Integer.parseInt(Key.substring(i*8,(i*8+8)),2);
+			KeyText +=((char)Z);
+		}		
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
