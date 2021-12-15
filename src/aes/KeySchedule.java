@@ -46,9 +46,9 @@ public class KeySchedule {
 	public static void keySchedule(String key) {
 
 		String KeyText = "";
-		for (int i = 0; i < Key.length()/8; i++) {
+		for (int i = 0; i < key.length()/8; i++) {
 			int Z =0;
-			Z = Integer.parseInt(Key.substring(i*8,(i*8+8)),2);
+			Z = Integer.parseInt(key.substring(i*8,(i*8+8)),2);
 			KeyText +=((char)Z);
 		}		
 
