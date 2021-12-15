@@ -29,7 +29,7 @@ public class Encryption {
 				for (int j = 0; j < 16; j++) {
 
 					// Substitution
-					WorkChar[j]=KeySchedule.SubstitutionMap1[Integer.valueOf(WorkChar[j])];	
+					WorkChar[j]=KeySchedule.SubstitutionMap[Integer.valueOf(WorkChar[j])];	
 				}
 
 				// Permutation

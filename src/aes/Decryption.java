@@ -59,7 +59,7 @@ public class Decryption {
 
 				for (int j = 0; j < 16; j++) {
 					int z = 0;
-					while (WorkChar[j] != KeySchedule.SubstitutionMap1[z]) {
+					while (WorkChar[j] != KeySchedule.SubstitutionMap[z]) {
 						z++;
 					}
 					WorkChar[j] = (char)z;		

@@ -93,7 +93,6 @@ public class TextField extends Button {
 				g2.setColor(Color.getHSBColor(hsb[0], hsb[1], hsb[1]));
 				g2.drawString(text.substring(cursor < selectionOrigin ? cursor : selectionOrigin, (cursor > selectionOrigin ? cursor : selectionOrigin)+1), 
 						X + g2.getFontMetrics().stringWidth(text.substring(0, cursor < selectionOrigin ? cursor : selectionOrigin)), Y);
-				System.out.println(cursor + ", " + selectionOrigin);
 			}
 			g2.setColor(Color.BLUE);
 			g2.drawString("" + text.charAt(cursor), 
@@ -120,8 +119,6 @@ public class TextField extends Button {
 
 	public void input(char c) {
 
-		System.out.println(cursor);
-
 		if (cursor >= text.length())
 			cursor = text.length() - 1;
 		else if (cursor < 0)
@@ -129,8 +126,6 @@ public class TextField extends Button {
 
 		if (text.length() == 0)
 			cursor = -1;
-
-		System.out.println(cursor);
 
 		if (!write)
 			return;
