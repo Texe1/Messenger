@@ -66,7 +66,7 @@ public class Server {
 	}
 	
 	
-	public static void laufen() { 
+	public static void run() { 
 		while(true) {
 			try {
 				Socket client = server.accept();
@@ -74,19 +74,6 @@ public class Server {
 				String name = in.readUTF();
 				
 				addClient(client, name);
-				
-//				System.out.println(s);
-//				char[] key = s.substring(0, 8).toCharArray();
-//				s = s.substring(8);
-//				String binStrKey = "";
-//				for (char c : key) {
-//					String bits = Integer.toBinaryString(c);
-//					while (bits.length() < 16) bits = "0" + bits;
-//					binStrKey += bits;
-//				}
-//				
-//				String msg = Decryption.decrypt(s, binStrKey);
-//				System.out.println("Decrypted messsage:\n" + msg);
 			} catch (Exception e) {
 				e.printStackTrace();
 				break;
@@ -120,6 +107,7 @@ public class Server {
 	
 	public static void updateContacts() {// sends updated contacts to every client
 		String namesList;
+		DataOutputStream dos;
 		for (int i = 0; i < clientNames.size(); i++) {
 			namesList = ">c";
 			for (String name : Server.clientNames) {
@@ -128,7 +116,8 @@ public class Server {
 			}
 			
 			try {
-				new DataOutputStream(clients.get(i).getOutputStream()).writeUTF(namesList);
+				dos = new DataOutputStream(clients.get(i).getOutputStream());
+				dos.writeUTF(namesList);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

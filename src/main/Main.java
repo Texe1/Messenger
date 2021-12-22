@@ -50,7 +50,7 @@ public class Main {
 			
 			Server.setLogger(fout);
 			Server.startSession();
-			Server.laufen();
+			Server.run();
 			
 			try {
 				fout.close();
@@ -60,31 +60,26 @@ public class Main {
 		} else if (input.equals("c")) {
 
 			Client c = new Client();
+			File logFile = new File("rsc\\clientLog.txt");
+			
+			for(int i = 0; true; i++) {
+				logFile = new File("rsc\\clientLog" + i + ".txt");
+				if(!logFile.exists())
+					break;
+			}
+			
+			try {
+				logFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+				logFile = null;
+			}
+			if(logFile == null)	c.setLogger(System.out);
+			else 				c.setLogger(logFile);
 			
 			Frame f = new Frame(c);
 			f.requestFocus();
-
-//			while (true) {
-//				String s = sc.nextLine();
-//				if (s.startsWith("-f")) {
-//					try {
-//						Scanner fsc = new Scanner(new File(s.substring(2).strip()));
-//						s = "";
-//						while (fsc.hasNextLine()) {
-//							s += "\n" + fsc.nextLine();
-//						}
-//					} catch (FileNotFoundException e) {
-//						System.err.println("Error: Could not find file \"" + s.substring(2).strip() + "\"");
-//						e.printStackTrace();
-//					}
-//				}
-//
-//				c.send(s);
-//
-//				if (s.equals("q") || !c.isWaiting())
-//					break;
-//
-//			}
+			
 		} else {
 			System.out.println("that was not one of the options!");
 		}

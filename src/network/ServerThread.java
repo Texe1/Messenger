@@ -44,7 +44,8 @@ public class ServerThread extends Thread {
 					Server.clients.remove(client);
 					Server.clientNames.remove(clientName);
 					Server.log(clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "] has disconnected.");
-					client.close();//
+					Server.updateContacts();
+					client.close();
 					break;
 
 				} else if (s.startsWith("m")) { // sending a message to other client

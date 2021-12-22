@@ -3,6 +3,7 @@ package network;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -10,13 +11,14 @@ import java.util.ArrayList;
 import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
+import main.Loggable;
 
-public class Client {
+public class Client extends Loggable{
 
 	Socket client;
 	DataOutputStream out;
 	DataInputStream in;
-	
+
 	ClientThread ct = new ClientThread(this);
 
 	private String[] contacts;
@@ -24,9 +26,9 @@ public class Client {
 	String host;
 	String name;
 	int serverPort;
-	
+
 	public boolean receivedContacts = false;
-	
+
 	public boolean connected;
 
 	private ArrayList<ArrayList<String>> chats = new ArrayList<>();
@@ -35,6 +37,8 @@ public class Client {
 
 //	public CopyOnWriteArrayList<String> msgQueue = new CopyOnWriteArrayList<>();
 
+	public static OutputStream logger;
+	
 	private boolean loop = true;
 	private int sendAttempts = 0;
 
@@ -42,6 +46,27 @@ public class Client {
 		return loop;
 	}
 
+//	public void setLogger(OutputStream out) {
+//		logger = out;
+//		log("Session: " + new Timestamp(System.currentTimeMillis()));
+//	}
+//	
+//	
+//	public void log(String s) {
+//		if(logger == null)logger = System.out;
+//		
+//		s = "<" + new Timestamp(System.currentTimeMillis()) + ">\t" + s + "\n";
+//		
+//		try {
+//			logger.write(s.getBytes());
+//			logger.flush();
+//		} catch (IOException e) {
+//			System.err.println("Could not access logger, switching to command prompt.");
+//			logger = System.out;
+//			log(s);
+//		}
+//	}
+	
 	public void connect(String host, int port, String name) {
 		this.host = host;
 		this.serverPort = port;
@@ -60,13 +85,14 @@ public class Client {
 			e.printStackTrace();
 		}
 		
-		ct.start();
-		
+		if(!ct.isAlive())
+			ct.start();
+
 		connected = true;
 	}
 
 	public void send(String s) {
-		System.out.println(s);
+		log(s);
 		if (s.equals("q")) {
 			disconnect();
 		} else if (s.startsWith("me")) {// wants to encrypt message
@@ -174,16 +200,30 @@ public class Client {
 				String s = in.readUTF();
 				if (s.startsWith(">c")) {
 					receivedContacts = true;
-					
+
 					if (s.length() > 3) {
 						s = s.substring(3);
 						contacts = s.split(" ");
-						System.out.println("received updated contacts list:\n\t"
-								+ s.replace(" ", "\n\t").replace(name, "").replace("\n\n", "\n"));
+						
+						for (int i = 0; i < chats.size(); i++) {
+							boolean isStillOnline = false;
+							for (int j = 0; j < contacts.length; j++) {
+								if(chats.get(i).get(i).equals(contacts[j])) {
+									isStillOnline = true;
+								}
+							}
+							if (!isStillOnline) {
+								chats.remove(i--);
+							}
+						}
+					}else if(s.strip().equals(">c")) {
+						contacts = null;
+						chats = new ArrayList<>();
+						receivedContacts = true;
 					}
 				} else if (s.startsWith("n")) {
 					name = s.substring(1);
-					System.out.println("name changed to: \"" + name + "\"");
+					log("name changed to: \"" + name + "\"");
 				} else if (s.startsWith("me")) {
 					String origin = s.substring(2, s.indexOf('\\'));
 					String encrMsg = s.substring(s.indexOf('\\') + 12);
@@ -199,22 +239,22 @@ public class Client {
 					}
 
 					String msg = Decryption.decrypt(encrMsg, keyBinStr);
-					
-					System.out.println(msg);
+
+					log("received message from '" + origin + ":\n" + msg + "\n_____");
 					addToChat(origin, msg);
 
 				} else if (s.startsWith("mp")) {
 					if (s.contains("\\") && !s.substring(2).startsWith("\\")) {
 						String name = s.substring(2, s.indexOf('\\'));
 						String msg = s.substring(s.indexOf('\\') + 1);
-						System.out.println(msg);
+						log("received message from '" + name + ":\n" + msg + "\n_____");
 						addToChat(name, msg);
 					} else {
 						s = s.substring(2);
 						if (s.startsWith("\\")) {
 							s = s.substring(1);
 						}
-						System.out.println("Message from <Anonymus>:\n\t" + s);
+						log("Message from <Anonymus>:\n\t" + s);
 					}
 				}
 			} catch (IOException e) {
@@ -226,9 +266,12 @@ public class Client {
 	}
 
 	public void disconnect() {
-		System.out.println("disconnecting...");
+		log("disconnecting...");
 		try {
 			out.writeUTF("q");
+			contacts = null;
+			chats = new ArrayList<>();
+			receivedContacts = true;
 			loop = false;
 			connected = false;
 		} catch (IOException e) {
@@ -251,10 +294,9 @@ public class Client {
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
 		
+		log("began chat with " + name);
 
-		System.out.println(name);
-		
-		return chats.get(chats.size() -1);
+		return chats.get(chats.size() - 1);
 	}
 
 	public ArrayList<String> beginChat(String name) {
@@ -278,7 +320,7 @@ public class Client {
 		}
 
 		if (chat == null) {
-			System.err.println("Error: could not find current chat with '" + name + "'");
+			log("Could not find current chat with '" + name + "', beginning new chat");
 			chat = beginChat(name, "aes");
 		}
 
@@ -291,7 +333,7 @@ public class Client {
 		s += name + "\\" + chat.get(1) + msg;
 
 		chat.add("\\" + msg);
-		
+
 		send(s);
 
 		return true;
@@ -304,15 +346,14 @@ public class Client {
 				chat = c;
 			}
 		}
-		
-		if(chat == null) {
+
+		if (chat == null) {
 			chat = beginChat(name, "aes");
 		}
 		
-//		chat.add(name + "\\" + msg);
 		chat.add(msg);
 	}
-	
+
 	public String[][] getChats() {
 		String[][] ret = new String[chats.size()][];
 
@@ -327,7 +368,8 @@ public class Client {
 	}
 
 	public String[] getContacts() {
-		if(contacts == null) return new String[0];
+		if (contacts == null)
+			return new String[0];
 		return contacts;
 	}
 
@@ -341,8 +383,11 @@ public class Client {
 
 		@Override
 		public void run() {
-			while (client.loop)
-				client.waitForMessage();
+			while (true) {
+				while (client.loop) {
+					client.waitForMessage();
+				}
+			}
 		}
 	}
 
