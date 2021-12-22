@@ -71,7 +71,7 @@ public class Text extends Drawable {
 				g.setColor(fontColor);
 				for (String s : lines) {
 					int sWidth = g.getFontMetrics().stringWidth(s);
-					g.drawString(s, absoluteCoords.x + (absoluteCoords.width - sWidth-10)/2, y);
+					g.drawString(s, absoluteCoords.x + (isCentered ? ((absoluteCoords.width - sWidth-10)/2) : 0), y);
 					y += f.getSize() * 3 / 2;
 				}
 			}
