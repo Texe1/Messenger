@@ -23,7 +23,7 @@ public class Client extends Loggable {
 	Thread receivingThread = new Thread() {
 		@Override
 		public void run() {
-			while (loop) {
+			while (!client.isClosed()) {
 				waitForMessage();
 			}
 		}
