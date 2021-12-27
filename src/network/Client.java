@@ -19,7 +19,7 @@ public class Client extends Loggable{
 	DataOutputStream out;
 	DataInputStream in;
 
-	ClientThread ct = new ClientThread(this);
+	Thread receivingThread = new ClientThread(this);
 
 	private String[] contacts;
 
@@ -42,30 +42,23 @@ public class Client extends Loggable{
 	private boolean loop = true;
 	private int sendAttempts = 0;
 
+	
+	public Client() {
+		receivingThread = new Thread() {
+			@Override
+			public void run() {
+				while (true) {
+					while (loop) {
+						waitForMessage();
+					}
+				}
+			}
+		};
+	}
+	
 	public boolean isWaiting() {
 		return loop;
 	}
-
-//	public void setLogger(OutputStream out) {
-//		logger = out;
-//		log("Session: " + new Timestamp(System.currentTimeMillis()));
-//	}
-//	
-//	
-//	public void log(String s) {
-//		if(logger == null)logger = System.out;
-//		
-//		s = "<" + new Timestamp(System.currentTimeMillis()) + ">\t" + s + "\n";
-//		
-//		try {
-//			logger.write(s.getBytes());
-//			logger.flush();
-//		} catch (IOException e) {
-//			System.err.println("Could not access logger, switching to command prompt.");
-//			logger = System.out;
-//			log(s);
-//		}
-//	}
 	
 	public void connect(String host, int port, String name) {
 		this.host = host;
@@ -85,8 +78,8 @@ public class Client extends Loggable{
 			e.printStackTrace();
 		}
 		
-		if(!ct.isAlive())
-			ct.start();
+		if(!receivingThread.isAlive())
+			receivingThread.start();
 
 		connected = true;
 	}
