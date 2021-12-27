@@ -7,19 +7,47 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
 import main.Loggable;
 
-public class Client extends Loggable{
+public class Client extends Loggable {
 
 	Socket client;
 	DataOutputStream out;
 	DataInputStream in;
 
-	Thread receivingThread = new ClientThread(this);
+	Thread receivingThread = new Thread() {
+		@Override
+		public void run() {
+			while (loop) {
+				waitForMessage();
+			}
+		}
+	};
+
+	Thread sendingThread = new Thread() {
+		public void run() {
+			while (!client.isClosed()) {
+				while (!outQueue.isEmpty()) {
+					send(outQueue.remove(0));
+				}
+			}
+		};
+	};
+
+	Thread processingThread = new Thread() {
+		public void run() {
+			while (!client.isClosed()) {
+				while (!inQueue.isEmpty()) {
+					processMsg(inQueue.remove(0));
+				}
+			}
+		};
+	};
 
 	private String[] contacts;
 
@@ -35,17 +63,18 @@ public class Client extends Loggable{
 
 	public static final String[] encryptions = new String[] { "aes" };
 
-//	public CopyOnWriteArrayList<String> msgQueue = new CopyOnWriteArrayList<>();
+	public CopyOnWriteArrayList<String> outQueue = new CopyOnWriteArrayList<>();
+	public CopyOnWriteArrayList<String> inQueue = new CopyOnWriteArrayList<>();
 
 	public static OutputStream logger;
-	
+
 	private boolean loop = true;
 	private int sendAttempts = 0;
-	
+
 	public boolean isWaiting() {
 		return loop;
 	}
-	
+
 	public void connect(String host, int port, String name) {
 		this.host = host;
 		this.serverPort = port;
@@ -55,7 +84,6 @@ public class Client extends Loggable{
 			out = new DataOutputStream(client.getOutputStream());
 			in = new DataInputStream(client.getInputStream());
 			out.writeUTF(name);
-			out.writeUTF("<c");
 
 		} catch (UnknownHostException e) {
 			System.err.println("Could not find Server at " + host + ":" + port);
@@ -65,17 +93,13 @@ public class Client extends Loggable{
 		}
 
 		connected = true;
-		
-		receivingThread = new Thread() {
-			@Override
-			public void run() {
-				while (loop) {
-					waitForMessage();
-				}
-			}
-		};
-		if(!receivingThread.isAlive())
+
+		if (!receivingThread.isAlive())
 			receivingThread.start();
+		if (!sendingThread.isAlive())
+			sendingThread.start();
+		if (!processingThread.isAlive())
+			processingThread.start();
 	}
 
 	public void send(String s) {
@@ -173,7 +197,7 @@ public class Client extends Loggable{
 		}
 	}
 
-	public void waitForMessage() {// waiting for Messages from Server or User
+	public void waitForMessage() {// waiting for Messages from Server or User and adding them to inQueue
 		try {
 			in = new DataInputStream(client.getInputStream());
 		} catch (IOException e) {
@@ -181,74 +205,75 @@ public class Client extends Loggable{
 			return;
 		}
 
-		while (loop) {
+		String msg;
+		try {
+			msg = in.readUTF();
+			inQueue.add(msg);
+		} catch (IOException e) {
+			if (loop)
+				e.printStackTrace();
+		}
+	}
 
-			try {
-				String s = in.readUTF();
-				if (s.startsWith(">c")) {
-					receivedContacts = true;
-					
-					if (s.length() > 3) {
-						s = s.substring(3);
-						contacts = s.split(" ");
-						
-						for (int i = 0; i < chats.size(); i++) {
-							boolean isStillOnline = false;
-							for (int j = 0; j < contacts.length; j++) {
-								if(chats.get(i).get(i).equals(contacts[j])) {
-									isStillOnline = true;
-								}
-							}
-							if (!isStillOnline) {
-								chats.remove(i--);
-							}
+	private synchronized void processMsg(String s) {
+		if (s.startsWith(">c")) {// receiving updated list of contacts
+
+			if (s.length() > 3) {
+				contacts = s.substring(3).split(" ");
+
+				for (int i = 0; i < chats.size(); i++) {
+					boolean isStillOnline = false;
+					for (int j = 0; j < contacts.length; j++) {
+
+						if (chats.get(i).get(i).equals(contacts[j])) {
+							isStillOnline = true;
 						}
-					}else if(s.strip().equals(">c")) {
-						contacts = null;
-						chats = new ArrayList<>();
-						receivedContacts = true;
 					}
-				} else if (s.startsWith("n")) {
-					name = s.substring(1);
-					log("name changed to: \"" + name + "\"");
-				} else if (s.startsWith("me")) {
-					String origin = s.substring(2, s.indexOf('\\'));
-					String encrMsg = s.substring(s.indexOf('\\') + 12);
-					char[] keyAsChars = s.substring(s.indexOf('\\') + 4, s.indexOf('\\') + 12).toCharArray();
-
-					String keyBinStr = "";
-
-					for (char c : keyAsChars) {
-						String t = Integer.toBinaryString((int) c);
-						while (t.length() < 16)
-							t = "0" + t;
-						keyBinStr += t;
-					}
-
-					String msg = Decryption.decrypt(encrMsg, keyBinStr);
-
-					log("received message from '" + origin + ":\n" + msg + "\n_____");
-					addToChat(origin, msg);
-
-				} else if (s.startsWith("mp")) {
-					if (s.contains("\\") && !s.substring(2).startsWith("\\")) {
-						String name = s.substring(2, s.indexOf('\\'));
-						String msg = s.substring(s.indexOf('\\') + 1);
-						log("received message from '" + name + ":\n" + msg + "\n_____");
-						addToChat(name, msg);
-					} else {
-						s = s.substring(2);
-						if (s.startsWith("\\")) {
-							s = s.substring(1);
-						}
-						log("Message from <Anonymus>:\n\t" + s);
+					if (!isStillOnline) {
+						chats.remove(i--);
 					}
 				}
-			} catch (IOException e) {
-				if (loop)
-					e.printStackTrace();
+			} else {
+				contacts = null;
+				chats = new ArrayList<>();
+				receivedContacts = true;
+			}
+			receivedContacts = true;
+		} else if (s.startsWith("n")) {// receiving compatible name
+			name = s.substring(1);
+			log("name changed to: \"" + name + "\"");
+		} else if (s.startsWith("me")) { // receiving encrypted message
+			String origin = s.substring(2, s.indexOf('\\'));
+			String encrMsg = s.substring(s.indexOf('\\') + 12);
+			char[] keyAsChars = s.substring(s.indexOf('\\') + 4, s.indexOf('\\') + 12).toCharArray();
+
+			String keyBinStr = "";
+
+			for (char c : keyAsChars) {
+				String t = Integer.toBinaryString((int) c);
+				while (t.length() < 16)
+					t = "0" + t;
+				keyBinStr += t;
 			}
 
+			String msg = Decryption.decrypt(encrMsg, keyBinStr);
+
+			log("received message from '" + origin + ":\n" + msg + "\n_____");
+			addToChat(origin, msg);
+
+		} else if (s.startsWith("mp")) { // receiving plain text message
+			if (s.contains("\\") && !s.substring(2).startsWith("\\")) {
+				String name = s.substring(2, s.indexOf('\\'));
+				String msg = s.substring(s.indexOf('\\') + 1);
+				log("received message from '" + name + ":\n" + msg + "\n_____");
+				addToChat(name, msg);
+			} else {
+				s = s.substring(2);
+				if (s.startsWith("\\")) {
+					s = s.substring(1);
+				}
+				log("Message from <Anonymus>:\n\t" + s);
+			}
 		}
 	}
 
@@ -280,7 +305,7 @@ public class Client extends Loggable{
 		chats.add(new ArrayList<String>());
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
-		
+
 		log("began chat with " + name);
 
 		return chats.get(chats.size() - 1);
@@ -311,17 +336,15 @@ public class Client extends Loggable{
 			chat = beginChat(name, "aes");
 		}
 
-		String s = "me";
+		String msgType = "me";
 
 		if (chat.get(1).equals("")) {
-			s = "mp";
+			msgType = "mp";
 		}
-
-		s += name + "\\" + chat.get(1) + msg;
 
 		chat.add("\\" + msg);
 
-		send(s);
+		outQueue.add(msgType + name + "\\" + chat.get(1) + msg);
 
 		return true;
 	}
@@ -337,7 +360,7 @@ public class Client extends Loggable{
 		if (chat == null) {
 			chat = beginChat(name, "aes");
 		}
-		
+
 		chat.add(msg);
 	}
 
