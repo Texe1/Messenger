@@ -15,6 +15,7 @@ public class Server {
 	
 	public static CopyOnWriteArrayList<String> clientNames = new CopyOnWriteArrayList<>();
 	public static CopyOnWriteArrayList<Socket> clients = new CopyOnWriteArrayList<>();
+	public static CopyOnWriteArrayList<ServerThread> threads = new CopyOnWriteArrayList<>();
 	
 	public static int clientCounter = 0;
 	
@@ -89,25 +90,21 @@ public class Server {
 			name = Integer.toString(clientCounter);
 		}
 		
+		log(name + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "] has connected to the server");
+		
+		
+		ServerThread t = new ServerThread(name, client);
+		t.start();
+		t.queueMsg("n" + name);
+		threads.add(t);
 		clients.add(client);
 		clientNames.add(name);
 		
-		log(name + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "] has connected to the server");
-		
-		try {
-			new DataOutputStream(client.getOutputStream()).writeUTF("n" + name);
-		} catch (IOException e) {
-			System.err.println("Could not send name verification message to client at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
-			e.printStackTrace();
-		}
-		
-		new ServerThread(name, client).start();
 		updateContacts();
 	}
 	
 	public static void updateContacts() {// sends updated contacts to every client
 		String namesList;
-		DataOutputStream dos;
 		for (int i = 0; i < clientNames.size(); i++) {
 			namesList = ">c";
 			for (String name : Server.clientNames) {
@@ -115,13 +112,17 @@ public class Server {
 					namesList += " " + name;
 			}
 			
+			System.out.println(clientNames.get(i) + " " + namesList);
+			
+			threads.get(i).queueMsg(namesList);
+			
 			try {
-				dos = new DataOutputStream(clients.get(i).getOutputStream());
-				dos.writeUTF(namesList);
+				new DataOutputStream(clients.get(i).getOutputStream()).writeUTF(namesList);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("\n");
 	}
 	
 }

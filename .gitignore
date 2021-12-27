@@ -1,4 +1,3 @@
 rsc/serverLog.txt
 *.class
-rsc/clientLog1.txt
-rsc/clientLog0.txt
+rsc/clientLog*.txt

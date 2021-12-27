@@ -41,20 +41,6 @@ public class Client extends Loggable{
 	
 	private boolean loop = true;
 	private int sendAttempts = 0;
-
-	
-	public Client() {
-		receivingThread = new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					while (loop) {
-						waitForMessage();
-					}
-				}
-			}
-		};
-	}
 	
 	public boolean isWaiting() {
 		return loop;
@@ -77,11 +63,19 @@ public class Client extends Loggable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		if(!receivingThread.isAlive())
-			receivingThread.start();
 
 		connected = true;
+		
+		receivingThread = new Thread() {
+			@Override
+			public void run() {
+				while (loop) {
+					waitForMessage();
+				}
+			}
+		};
+		if(!receivingThread.isAlive())
+			receivingThread.start();
 	}
 
 	public void send(String s) {
@@ -193,7 +187,7 @@ public class Client extends Loggable{
 				String s = in.readUTF();
 				if (s.startsWith(">c")) {
 					receivedContacts = true;
-
+					
 					if (s.length() > 3) {
 						s = s.substring(3);
 						contacts = s.split(" ");
@@ -376,10 +370,8 @@ public class Client extends Loggable{
 
 		@Override
 		public void run() {
-			while (true) {
-				while (client.loop) {
-					client.waitForMessage();
-				}
+			while (client.loop) {
+				client.waitForMessage();
 			}
 		}
 	}
