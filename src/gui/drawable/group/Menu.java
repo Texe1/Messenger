@@ -8,45 +8,79 @@ import gui.general.Frame;
 
 public class Menu extends Group{
 	
+	private CopyOnWriteArrayList<String> pages = new CopyOnWriteArrayList<>();
+	private CopyOnWriteArrayList<MenuButton> menuButtons = new CopyOnWriteArrayList<>();
+	
+	Frame frame;
+	
 	public Menu(Frame f) {
 		super(-200f, 0f, 200f, 1f);
 		setCoordType(2, CoordType.ABS);
 		setCoordType(3, CoordType.REL);
+		this.frame = f;
+		this.restrictUpdate = false;
 		update(f, f.getBounds());
 	}
 	
 	@Override
 	public void update(Frame frame, Rectangle r) {
 		super.update(frame, r);
-		float y = getCoords()[1] + 100;
 		
-		this.buttons = new CopyOnWriteArrayList<>();
-		this.drawables = new CopyOnWriteArrayList<>();
 		
-		for (int i = 0; i < frame.getGroups().length; i++) {
-			Group group = frame.getGroups()[i];
+		// adding new Pages
+		for (int i = 0; i < frame.getAllGroups().length; i++) {
+			Group group = frame.getAllGroups()[i];
 			if(group.name == Group.NAME_GENERIC) {
 				continue;
 			}
 			
-			MenuButton b = new MenuButton(y, group.name, i) {
-				
-				@Override
-				public void run() {
-					frame.showGroups(new int[] {i});
-					frame.update();
-				}
-			};
+			if(pages.contains(group.name)) continue;
 			
-			y += 40;
-			
-			b.edgeRadius = 0;
-			
-			b.setText(group.name);
-			b.update(frame, absoluteCoords);
-			this.add(b);
+			addPage(group.name, group);
 			
 		}
+		
+		// removing old pages
+		Group[] groups = frame.getAllGroups();
+		boolean isStillActive = false;
+		for (String s : pages) {
+			isStillActive = false;
+			for (Group group : groups) {
+				if(group.name.equals(s)) {
+					isStillActive = true;
+					break;
+				}
+			}
+			if(!isStillActive) {
+				removePage(s);
+			}
+		}
+	}
+	
+	public synchronized void addPage(String s, Group g) {
+		pages.add(s);
+		
+		MenuButton mb = new MenuButton(getCoords()[1] + 60 + 40 * pages.size(), s, pages.size()-1) {
+			
+			@Override
+			public void run() {
+				frame.showGroup(g);
+				frame.update();
+			}
+		};
+		
+		menuButtons.add(mb);
+		System.out.println(getCoords()[1] + 60 + 40 * pages.size());
+		add(mb);
+	}
+	
+	public synchronized void removePage(String s) {
+		int i = pages.indexOf(s);
+		
+		MenuButton mb = menuButtons.remove(i);
+		
+		buttons.remove(mb);
+		drawables.remove(mb);
 	}
 	
 	public static abstract class MenuButton extends Button{
@@ -57,7 +91,7 @@ public class Menu extends Group{
 			super(0f, y, 1f, 40f);
 			setCoordType(2, CoordType.REL);
 			
-			this.text = name;
+			this.setText(name);
 			this.i = i;
 		}
 	}

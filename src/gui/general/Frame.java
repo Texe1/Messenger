@@ -27,8 +27,6 @@ public class Frame extends java.awt.Frame {
 	private Group[] currentGroups = new Group[0];
 	
 	Rectangle drawingRect;
-	
-	private int drawCycle = 0; // updates at 100 cycles of drawing
 
 	public Frame(int width, int height) {
 		drawingRect = new Rectangle(0, 0, width, height);
@@ -172,7 +170,7 @@ public class Frame extends java.awt.Frame {
 		
 		createBufferStrategy(3);
 
-		Thread t = new Thread() {
+		Thread drawThread = new Thread() {
 			@Override
 			public void run() {
 				while (this.isAlive()) {
@@ -181,7 +179,24 @@ public class Frame extends java.awt.Frame {
 			}
 		};
 
-		t.start();
+		drawThread.start();
+		
+		Thread updateThread = new Thread() {
+			@Override
+			public void run() {
+				long time = System.currentTimeMillis();
+				long deltaTime = 0;
+				while(true) {
+					deltaTime = System.currentTimeMillis() - time;
+					if(deltaTime >= 100) {
+						update();
+					}
+				}
+			}
+		};
+
+		updateThread.setDaemon(true);
+		updateThread.start();
 
 	}
 	
@@ -203,7 +218,7 @@ public class Frame extends java.awt.Frame {
 		}
 		
 		for (int i = 0; i < groups.size(); i++) {
-			ret[i] = groups.get(i + fixedGroups.size());
+			ret[i + fixedGroups.size()] = groups.get(i);
 		}
 		
 		return ret;
@@ -267,11 +282,11 @@ public class Frame extends java.awt.Frame {
 			group.draw(g);
 		}
 
-		drawCycle++;
-		drawCycle %= 10;
-		if (drawCycle == 0) {
-			update();
-		}
+//		drawCycle++;
+//		drawCycle %= 10;
+//		if (drawCycle == 0) {
+//			update();
+//		}
 
 		g.dispose();
 
@@ -280,6 +295,15 @@ public class Frame extends java.awt.Frame {
 		}catch (Exception e) {
 			e.printStackTrace();
 			return;
+		}
+	}
+	
+	public void showGroup(Group g) {
+		for (int i = 0; i < groups.size(); i++) {
+			if(groups.get(i).name.equals(g.name)) {
+				showGroups(new int[] {i});
+				break;
+			}
 		}
 	}
 

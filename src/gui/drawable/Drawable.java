@@ -42,7 +42,6 @@ public abstract class Drawable {
 	public void update(Frame f, Rectangle r) {
 		
 		if(lastRefRect == r && restrictUpdate) return;
-		
 		lastRefRect = r;
 		
 		absoluteCoords.x = Math.round(scaledSizes[0]) + r.x;

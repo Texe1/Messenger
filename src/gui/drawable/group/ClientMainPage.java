@@ -8,13 +8,13 @@ import gui.drawable.Text;
 import gui.drawable.TextField;
 import gui.general.ClientFrame;
 
-public class MainPage extends Group{
+public class ClientMainPage extends Group{
 	
 	public TextField tf_hostIP, tf_port, tf_name;
 	
 	ClientFrame frame;
 	
-	public MainPage(ClientFrame f) {
+	public ClientMainPage(ClientFrame f) {
 		super();
 		this.setCoordType(2, CoordType.REL);
 		this.setCoordType(3, CoordType.REL);
