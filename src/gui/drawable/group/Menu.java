@@ -9,8 +9,8 @@ import gui.general.Frame;
 public class Menu extends Group{
 	
 	public Menu(Frame f) {
-		super(0f, 0f, 1f, 1f);
-		setCoordType(2, CoordType.REL);
+		super(-200f, 0f, 200f, 1f);
+		setCoordType(2, CoordType.ABS);
 		setCoordType(3, CoordType.REL);
 		update(f, f.getBounds());
 	}
@@ -23,14 +23,17 @@ public class Menu extends Group{
 		this.buttons = new CopyOnWriteArrayList<>();
 		this.drawables = new CopyOnWriteArrayList<>();
 		
-		for (int i = 0; i < frame.getGroups().size(); i++) {
-			Group group = frame.getGroups().get(i);
+		for (int i = 0; i < frame.getGroups().length; i++) {
+			Group group = frame.getGroups()[i];
+			if(group.name == Group.NAME_GENERIC) {
+				continue;
+			}
 			
 			MenuButton b = new MenuButton(y, group.name, i) {
 				
 				@Override
 				public void run() {
-					frame.showGroup(i);
+					frame.showGroups(new int[] {i});
 					frame.update();
 				}
 			};

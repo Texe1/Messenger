@@ -6,15 +6,15 @@ import java.awt.Rectangle;
 import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
-import gui.general.Frame;
+import gui.general.ClientFrame;
 
 public class MainPage extends Group{
 	
-	TextField tf_hostIP, tf_port, tf_name;
+	public TextField tf_hostIP, tf_port, tf_name;
 	
-	Frame frame;
+	ClientFrame frame;
 	
-	public MainPage(Frame f) {
+	public MainPage(ClientFrame f) {
 		super();
 		this.setCoordType(2, CoordType.REL);
 		this.setCoordType(3, CoordType.REL);
@@ -51,6 +51,7 @@ public class MainPage extends Group{
 
 			@Override
 			public void run() {
+				System.out.println("Hi!");
 				if (frame.client.connected) {
 					frame.client.disconnect();
 					this.setText("connect");

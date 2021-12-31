@@ -10,102 +10,54 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.JFrame;
-
 import gui.drawable.Button;
 import gui.drawable.TextField;
-import gui.drawable.group.Chat;
 import gui.drawable.group.Group;
-import gui.drawable.group.MainPage;
-import gui.drawable.group.Menu;
-import network.Client;
 
-public class Frame extends JFrame {
+public class Frame extends java.awt.Frame {
 
-	private static final long serialVersionUID = -8246131571704187284L;
+	private static final long serialVersionUID = 4350277027834712246L;
 
 	private CopyOnWriteArrayList<Group> groups = new CopyOnWriteArrayList<>();
-	private Group currentGroup;
-
-	private Menu menu;
-
-	public Client client;
-
+	private CopyOnWriteArrayList<Group> fixedGroups = new CopyOnWriteArrayList<>();
+	private Group[] currentGroups = new Group[0];
+	
+	Rectangle drawingRect;
+	
 	private int drawCycle = 0; // updates at 100 cycles of drawing
 
-	public Frame(Client client) {
-		setSize(1200, 1000);
-		setLocationRelativeTo(null);
+	public Frame(int width, int height) {
+		drawingRect = new Rectangle(0, 0, width, height);
+		this.setSize(width, height);
+		this.setLocationRelativeTo(null);
+		this.setBackground(Color.DARK_GRAY.darker());
 
-		setBackground(Color.DARK_GRAY.darker());
-
-		addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowOpened(WindowEvent e) {
-			}
-
-			@Override
-			public void windowIconified(WindowEvent e) {
-			}
-
-			@Override
-			public void windowDeiconified(WindowEvent e) {
-			}
-
-			@Override
-			public void windowDeactivated(WindowEvent e) {
-			}
-
-			@Override
-			public void windowClosing(WindowEvent e) {
-				if (client.connected)
-					client.disconnect();
-				System.exit(0);
-			}
-
-			@Override
-			public void windowClosed(WindowEvent e) {
-			}
-
-			@Override
-			public void windowActivated(WindowEvent e) {
-			}
-		});
 		addMouseListener(new MouseListener() {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				for (Button b : currentGroup.getButtons()) {
-					b.setClicked(false);
-				}
-
-				for (Button b : menu.getButtons()) {
-					b.setClicked(false);
-				}
-
-				for (TextField t : currentGroup.getTextFields()) {
-					if (!t.isInBounds(e.getX(), e.getY()))
-						t.unFocus();
+				for (Group g : currentGroups) {
+					for (Button b : g.getButtons()) {
+						b.setClicked(false);
+					}
+					for (TextField t : g.getTextFields()) {
+						if (!t.isInBounds(e.getX(), e.getY()))
+							t.unFocus();
+					}
 				}
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				for (Button b : currentGroup.getButtons()) {
-					if (b.isInBounds(e.getX(), e.getY())) {
-						b.setClicked(true);
-					}
-				}
-				for (Button b : menu.getButtons()) {
-					if (b.isInBounds(e.getX(), e.getY())) {
-						b.setClicked(true);
+				for (Group g : currentGroups) {
+					for (Button b : g.getButtons()) {
+						if (b.isInBounds(e.getX(), e.getY())) {
+							b.setClicked(true);
+						}
 					}
 				}
 			}
@@ -126,23 +78,19 @@ public class Frame extends JFrame {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				for (Button b : currentGroup.getButtons()) {
-					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
-				}
-
-				for (Button b : menu.getButtons()) {
-					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
+				for (Group g : currentGroups) {
+					for (Button b : g.getButtons()) {
+						b.setFocussed(b.isInBounds(e.getX(), e.getY()));
+					}
 				}
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				for (Button b : currentGroup.getButtons()) {
-					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
-				}
-
-				for (Button b : menu.getButtons()) {
-					b.setFocussed(b.isInBounds(e.getX(), e.getY()));
+				for (Group g : currentGroups) {
+					for (Button b : g.getButtons()) {
+						b.setFocussed(b.isInBounds(e.getX(), e.getY()));
+					}
 				}
 			}
 		});
@@ -151,17 +99,26 @@ public class Frame extends JFrame {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				if (e.getKeyChar() == '\t') {
-					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
-						if (currentGroup.getTextFields().get(i).write) {
-							currentGroup.getTextFields().get(i).write = false;
-							currentGroup.getTextFields()
-									.get((i + 1) % currentGroup.getTextFields().size()).write = true;
-							break;
+					boolean input = false;
+					for (Group g : currentGroups) {
+						for (int i = 0; i < g.getTextFields().size(); i++) {
+							if (g.getTextFields().get(i).write) {
+								g.getTextFields().get(i).write = false;
+								g.getTextFields().get((i + 1) % g.getTextFields().size()).write = true;
+
+								input = true;
+								break;
+							}
 						}
+
+						if (input)
+							break;
 					}
 				} else {
-					for (TextField t : currentGroup.getTextFields()) {
-						t.input("" + e.getKeyChar());
+					for (Group g : currentGroups) {
+						for (TextField t : g.getTextFields()) {
+							t.input("" + e.getKeyChar());
+						}
 					}
 				}
 			}
@@ -172,21 +129,34 @@ public class Frame extends JFrame {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == 37) {
-					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
-						if (currentGroup.getTextFields().get(i).write) {
-							currentGroup.getTextFields().get(i).moveCusorBack(e.isControlDown(), e.isShiftDown());
-							break;
+				if (e.getKeyCode() == 37) {
+					boolean input = false;
+					for (Group g : currentGroups) {
+						for (int i = 0; i < g.getTextFields().size(); i++) {
+							if (g.getTextFields().get(i).write) {
+								g.getTextFields().get(i).moveCusorBack(e.isControlDown(), e.isShiftDown());
+
+								input = true;
+								break;
+							}
 						}
+						if (input)
+							break;
 					}
 					return;
 				}
-				if(e.getKeyCode() == 39) {
-					for (int i = 0; i < currentGroup.getTextFields().size(); i++) {
-						if (currentGroup.getTextFields().get(i).write) {
-							currentGroup.getTextFields().get(i).moveCusorForwards(e.isControlDown(), e.isShiftDown());
-							break;
+				if (e.getKeyCode() == 39) {
+					boolean input = false;
+					for (Group g : currentGroups) {
+						for (int i = 0; i < g.getTextFields().size(); i++) {
+							if (g.getTextFields().get(i).write) {
+								g.getTextFields().get(i).moveCusorForwards(e.isControlDown(), e.isShiftDown());
+								input = true;
+								break;
+							}
 						}
+						if (input)
+							break;
 					}
 					return;
 				}
@@ -194,22 +164,12 @@ public class Frame extends JFrame {
 		});
 
 		this.setMinimumSize(new Dimension(510, 400));
-		
+
 		this.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
 		setVisible(true);
-
-		this.client = client;
-
-		menu = new Menu(this);
-
-		Group mainPage = new MainPage(this);
-
-		groups.add(mainPage);
-		showGroup(0);
-
-		menu.update(this, new Rectangle(200, this.getHeight()));
-
+		
+		
 		createBufferStrategy(3);
 
 		Thread t = new Thread() {
@@ -224,44 +184,67 @@ public class Frame extends JFrame {
 		t.start();
 
 	}
-
-	public void showGroup(int i) {
-		currentGroup = groups.get(i);
+	
+	public synchronized void showGroups(int[] is) {
+		currentGroups = new Group[is.length+fixedGroups.size()];
+		for (int i = 0; i < is.length; i++) {
+			currentGroups[i] = groups.get(is[i]);
+		}
+		for (int i = 0; i < fixedGroups.size(); i++) {
+			currentGroups[i+is.length] = fixedGroups.get(i);
+		}
 	}
-
-	public CopyOnWriteArrayList<Group> getGroups() {
-		return groups;
+	
+	public Group[] getAllGroups() {
+		Group[] ret = new Group[groups.size() + fixedGroups.size()];
+		
+		for (int i = 0; i < fixedGroups.size(); i++) {
+			ret[i] = fixedGroups.get(i);
+		}
+		
+		for (int i = 0; i < groups.size(); i++) {
+			ret[i] = groups.get(i + fixedGroups.size());
+		}
+		
+		return ret;
 	}
-
+	
+	public Group[] getGroups() {
+		Group[] ret = new Group[groups.size()];
+		
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = groups.get(i);
+		}
+		
+		return ret;
+	}
+	
+	public Group[] getFixedGroups() {
+		Group[] ret = new Group[groups.size()];
+		
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = groups.get(i);
+		}
+		
+		return ret;
+	}
+	
 	public void add(Group g) {
 		groups.add(g);
-		menu.update(this, new Rectangle(200, this.getHeight()));
 	}
-
+	public void addFixed(Group g) {
+		fixedGroups.add(g);
+	}
+	
 	public void update() {
 		for (Group group : groups) {
-			group.update(this, new Rectangle(200, 0, this.getWidth()-200, this.getHeight()));
+			group.update(this, drawingRect);
 		}
-
-		if (!client.receivedContacts)
-			return;
-
-		client.receivedContacts = false;
-
-		Group mainPage = getGroups().get(0);
-
-		groups = new CopyOnWriteArrayList<>();
-
-		groups.add(mainPage);
-
-		String[] contacts = client.getContacts();
-
-		for (String name : contacts) {
-			add(new Chat(client, name));
+		for (Group group : fixedGroups) {
+			group.update(this, drawingRect);
 		}
-		menu.update(this, new Rectangle(200, this.getHeight()));
 	}
-
+	
 	public void draw() {
 		BufferStrategy bs = getBufferStrategy();
 
@@ -273,22 +256,21 @@ public class Frame extends JFrame {
 		
 		try {
 			g = bs.getDrawGraphics();
-		} catch (IllegalStateException ise) {
-			ise.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 			return;
 		}
 		
 		g.clearRect(0, 0, getWidth(), getHeight());
 
-		currentGroup.draw(g);
-
-		menu.draw(g);
+		for (Group group : currentGroups) {
+			group.draw(g);
+		}
 
 		drawCycle++;
-		drawCycle %= 100;
-		update();
+		drawCycle %= 10;
 		if (drawCycle == 0) {
-
+			update();
 		}
 
 		g.dispose();
@@ -301,4 +283,15 @@ public class Frame extends JFrame {
 		}
 	}
 
+	public void keepGroups(int[] indices){
+		CopyOnWriteArrayList<Group> keptGroups = new CopyOnWriteArrayList<>();
+		
+		for (int i = 0; i < indices.length; i++) {
+			keptGroups.add(groups.get(indices[i]));
+		}
+		
+		groups = keptGroups;
+	}
+	
+	
 }

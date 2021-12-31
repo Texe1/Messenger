@@ -8,7 +8,11 @@ import gui.general.Frame;
 public abstract class Drawable {
 	boolean dead = false;
 	public boolean draw = true;
+	
+	Rectangle lastRefRect = new Rectangle(0, 0, 0, 0);
 
+	public boolean restrictUpdate = true;
+	
 	protected String s = "";
 	
 	public Rectangle absoluteCoords = new Rectangle(0, 0, 0, 0);
@@ -36,6 +40,11 @@ public abstract class Drawable {
 	public abstract void draw(Graphics g);
 
 	public void update(Frame f, Rectangle r) {
+		
+		if(lastRefRect == r && restrictUpdate) return;
+		
+		lastRefRect = r;
+		
 		absoluteCoords.x = Math.round(scaledSizes[0]) + r.x;
 		absoluteCoords.y = Math.round(scaledSizes[1]) + r.y;
 		absoluteCoords.width = Math.round(scaledSizes[2]);

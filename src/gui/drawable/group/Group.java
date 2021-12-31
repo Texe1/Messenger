@@ -12,6 +12,8 @@ import gui.general.Frame;
 
 public class Group extends Drawable{
 	
+	public static final String NAME_GENERIC = "generic";
+	
 	protected CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<Button> buttons = new CopyOnWriteArrayList<>();
 	protected CopyOnWriteArrayList<TextField> textFields = new CopyOnWriteArrayList<>();
@@ -30,7 +32,7 @@ public class Group extends Drawable{
 		super(x, y, width, height);
 	}
 	
-	public String name = "Anonymus";
+	public String name = NAME_GENERIC;
 	
 	public void add(Drawable d) {
 		drawables.add(d);

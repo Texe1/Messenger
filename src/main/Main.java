@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-import gui.general.Frame;
+import gui.general.ClientFrame;
 import network.Client;
 import network.Server;
 
@@ -77,7 +77,11 @@ public class Main {
 			if(logFile == null)	c.setLogger(System.out);
 			else 				c.setLogger(logFile);
 			
-			Frame f = new Frame(c);
+			long time = System.nanoTime();
+			ClientFrame f = new ClientFrame(c);
+			time = System.nanoTime() - time;
+			System.out.println("Frame() contructor took " + time + "ns");
+			
 			f.requestFocus();
 			
 		} else {
