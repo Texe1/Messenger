@@ -39,12 +39,12 @@ public abstract class Drawable {
 
 	public abstract void draw(Graphics g);
 
-	public void update(Frame f, Rectangle r) {
-		if (lastRefRect.equals(r) && restrictUpdate) {
+	public void update(Frame f, Rectangle r, boolean forceUpdate) {
+		if (!forceUpdate && lastRefRect.equals(r) && restrictUpdate) {
 			return;
 		}
 
-		int oldWidth = absoluteCoords.width;
+//		int oldWidth = absoluteCoords.width;
 		
 		absoluteCoords.x = Math.round(scaledSizes[0]) + r.x;
 		absoluteCoords.y = Math.round(scaledSizes[1]) + r.y;
@@ -84,7 +84,7 @@ public abstract class Drawable {
 			break;
 		case REL:// coordinate 2 is relative to the width of the container
 			absoluteCoords.width = Math.round(scaledSizes[2] * r.width);
-			if(s.equals("ClientMainPage") && oldWidth != absoluteCoords.width)System.out.println("[2]rel|" + oldWidth + "=>" + absoluteCoords.width);
+//			if(s.equals("ClientMainPage") && oldWidth != absoluteCoords.width)System.out.println("[2]rel|" + oldWidth + "=>" + absoluteCoords.width);
 			break;
 		case DIST:// coordinate 2 defines the distance between the component's right edge and the
 					// container's right edge

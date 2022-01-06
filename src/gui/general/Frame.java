@@ -12,8 +12,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -46,6 +44,7 @@ public class Frame extends java.awt.Frame {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				drawingRect = new Rectangle(200, 0, getWidth()-200, getHeight());
+				update(true);
 			}
 			
 			@Override
@@ -210,7 +209,7 @@ public class Frame extends java.awt.Frame {
 				while(true) {
 					deltaTime = System.currentTimeMillis() - time;
 					if(deltaTime >= 100) {
-						update();
+						update(false);
 					}
 				}
 			}
@@ -272,12 +271,12 @@ public class Frame extends java.awt.Frame {
 		fixedGroups.add(g);
 	}
 	
-	public void update() {
+	public void update(boolean forceUpdate) {
 		for (Group group : groups) {
-			group.update(this, drawingRect);
+			group.update(this, drawingRect, forceUpdate);
 		}
 		for (Group group : fixedGroups) {
-			group.update(this, drawingRect);
+			group.update(this, drawingRect, forceUpdate);
 		}
 	}
 	
@@ -292,8 +291,8 @@ public class Frame extends java.awt.Frame {
 		
 		try {
 			g = bs.getDrawGraphics();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalStateException ise) {
+//			ise.printStackTrace();
 			return;
 		}
 		
@@ -302,12 +301,6 @@ public class Frame extends java.awt.Frame {
 		for (Group group : currentGroups) {
 			group.draw(g);
 		}
-
-//		drawCycle++;
-//		drawCycle %= 10;
-//		if (drawCycle == 0) {
-//			update();
-//		}
 
 		g.dispose();
 

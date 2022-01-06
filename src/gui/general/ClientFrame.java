@@ -57,13 +57,14 @@ public class ClientFrame extends Frame {
 
 	}
 
-	public void update() {
-		super.update();
+	@Override
+	public void update(boolean forceUpdate) {
+		super.update(forceUpdate);
 
-		if (client == null || !client.receivedContacts)
+		if (client == null || !client.receivedContacts())
 			return;
 
-		client.receivedContacts = false;
+//		client.receivedContacts() = false;
 		
 		keepGroups(new int[] {0});
 

@@ -55,7 +55,7 @@ public class Client extends Loggable {
 	String name;
 	int serverPort;
 
-	public boolean receivedContacts = false;
+	boolean receivedContacts = false;
 
 	public boolean connected;
 
@@ -73,6 +73,14 @@ public class Client extends Loggable {
 
 	public boolean isWaiting() {
 		return loop;
+	}
+	
+	public boolean receivedContacts() {
+		if(receivedContacts) {
+			receivedContacts = false;
+			return true;
+		}
+		return false;
 	}
 
 	public void connect(String host, int port, String name) {
@@ -307,7 +315,7 @@ public class Client extends Loggable {
 		chats.get(chats.size() - 1).add(encryption);
 
 		log("began chat with " + name);
-
+		
 		return chats.get(chats.size() - 1);
 	}
 
@@ -345,7 +353,7 @@ public class Client extends Loggable {
 		chat.add("\\" + msg);
 
 		outQueue.add(msgType + name + "\\" + chat.get(1) + msg);
-
+		
 		return true;
 	}
 
@@ -362,6 +370,7 @@ public class Client extends Loggable {
 		}
 
 		chat.add(msg);
+		
 	}
 	
 	public String[] getChat(String name) {
@@ -398,22 +407,6 @@ public class Client extends Loggable {
 		if (contacts == null)
 			return new String[0];
 		return contacts;
-	}
-
-	public static class ClientThread extends Thread {
-
-		private Client client;
-
-		public ClientThread(Client client) {
-			this.client = client;
-		}
-
-		@Override
-		public void run() {
-			while (client.loop) {
-				client.waitForMessage();
-			}
-		}
 	}
 
 }

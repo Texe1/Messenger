@@ -19,13 +19,13 @@ public class Menu extends Group{
 		setCoordType(3, CoordType.REL);
 		this.frame = f;
 		this.restrictUpdate = false;
-		update(f, f.getBounds());
+		update(f, f.getBounds(), false);
 		this.s = "Menu";
 	}
 	
 	@Override
-	public void update(Frame frame, Rectangle r) {
-		super.update(frame, r);
+	public void update(Frame frame, Rectangle r, boolean forceUpdate) {
+		super.update(frame, r, forceUpdate);
 		
 		
 		// adding new Pages
@@ -66,12 +66,11 @@ public class Menu extends Group{
 			@Override
 			public void run() {
 				frame.showGroup(g);
-				frame.update();
+				frame.update(false);
 			}
 		};
 		
 		menuButtons.add(mb);
-		System.out.println(getCoords()[1] + 60 + 40 * pages.size());
 		add(mb);
 	}
 	

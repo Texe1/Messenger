@@ -49,8 +49,8 @@ public class Chat extends Group {
 
 
 	@Override
-	public void update(Frame f, Rectangle r) {
-		super.update(f, r);
+	public void update(Frame f, Rectangle r, boolean forceUpdate) {
+		super.update(f, r, forceUpdate);
 		String[] chat = client.getChat(name);
 
 		boolean updated = false;
@@ -89,7 +89,7 @@ public class Chat extends Group {
 				messages.add(text);
 			}
 			
-			if(updated) {
+			if(updated || forceUpdate) {
 				for (Text t : messages) {
 					t.draw = false;
 				}

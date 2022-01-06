@@ -1,13 +1,11 @@
 package gui.drawable.group;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 
 import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
 import gui.general.ClientFrame;
-import gui.general.Frame;
 
 public class ClientMainPage extends Group{
 	
@@ -54,7 +52,6 @@ public class ClientMainPage extends Group{
 
 			@Override
 			public void run() {
-				System.out.println("Hi!");
 				if (frame.client.connected) {
 					frame.client.disconnect();
 					this.setText("connect");
@@ -74,13 +71,6 @@ public class ClientMainPage extends Group{
 		add(b);
 
 		this.name = "connection";
-	}
-
-	@Override
-	public void update(Frame f, Rectangle r) {
-		Rectangle s = new Rectangle(absoluteCoords);
-		super.update(f, r);
-		if(!s.equals(absoluteCoords))System.out.println(absoluteCoords);
 	}
 	
 }

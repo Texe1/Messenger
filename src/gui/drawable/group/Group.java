@@ -70,12 +70,10 @@ public class Group extends Drawable{
 	}
 	
 	@Override
-	public void update(Frame f, Rectangle r) {
-		Rectangle s = new Rectangle(absoluteCoords);
-		super.update(f, r);
-		if(!s.equals(absoluteCoords))System.out.println("subUpdating...");
+	public void update(Frame f, Rectangle r, boolean forceUpdate) {
+		super.update(f, r, forceUpdate);
 		for (Drawable d : drawables) {
-			d.update(f, absoluteCoords);
+			d.update(f, absoluteCoords, forceUpdate);
 			d.lastRefRect = absoluteCoords;
 		}
 	}
