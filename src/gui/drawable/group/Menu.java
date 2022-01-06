@@ -20,6 +20,7 @@ public class Menu extends Group{
 		this.frame = f;
 		this.restrictUpdate = false;
 		update(f, f.getBounds());
+		this.s = "Menu";
 	}
 	
 	@Override

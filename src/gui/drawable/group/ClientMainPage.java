@@ -7,6 +7,7 @@ import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
 import gui.general.ClientFrame;
+import gui.general.Frame;
 
 public class ClientMainPage extends Group{
 	
@@ -18,8 +19,10 @@ public class ClientMainPage extends Group{
 		super();
 		this.setCoordType(2, CoordType.REL);
 		this.setCoordType(3, CoordType.REL);
-		this.absoluteCoords = new Rectangle(100, 0, 0, 0);
+//		this.absoluteCoords = new Rectangle(100, 0, 0, 0);
 		this.frame = f;
+		
+		this.s = "ClientMainPage";
 		
 		tf_hostIP = new TextField(.0f, 100.0f, 100.0f, 40.0f);
 		tf_hostIP.setCoordType(2, CoordType.DIST);
@@ -71,6 +74,13 @@ public class ClientMainPage extends Group{
 		add(b);
 
 		this.name = "connection";
+	}
+
+	@Override
+	public void update(Frame f, Rectangle r) {
+		Rectangle s = new Rectangle(absoluteCoords);
+		super.update(f, r);
+		if(!s.equals(absoluteCoords))System.out.println(absoluteCoords);
 	}
 	
 }

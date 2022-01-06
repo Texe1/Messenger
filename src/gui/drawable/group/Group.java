@@ -26,6 +26,7 @@ public class Group extends Drawable{
 		setCoordType(1, CoordType.REL);
 		setCoordType(2, CoordType.REL);
 		setCoordType(3, CoordType.REL);
+		this.s = "Group";
 	}
 	
 	public Group(float x, float y, float width, float height) {
@@ -70,9 +71,12 @@ public class Group extends Drawable{
 	
 	@Override
 	public void update(Frame f, Rectangle r) {
+		Rectangle s = new Rectangle(absoluteCoords);
 		super.update(f, r);
+		if(!s.equals(absoluteCoords))System.out.println("subUpdating...");
 		for (Drawable d : drawables) {
-			d.update(f, this.absoluteCoords);
+			d.update(f, absoluteCoords);
+			d.lastRefRect = absoluteCoords;
 		}
 	}
 }

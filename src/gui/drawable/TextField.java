@@ -22,11 +22,13 @@ public class TextField extends Button {
 	public TextField(int x, int y, int width, int height) {
 		super(x, y, width, height);
 		maxChars = width / 10;
+		this.s = "TextField";
 	}
 
 	public TextField(int x, int y, int width, int height, Color color) {
 		super(x, y, width, height, color);
 		maxChars = width / 20;
+		this.s = "TextField";
 	}
 
 	public TextField(int x, int y, int fontSize, int maxChars, String defaultText) {
@@ -34,11 +36,13 @@ public class TextField extends Button {
 		changeFontsize(fontSize);
 		this.maxChars = maxChars;
 		this.defaultText = defaultText;
+		this.s = "TextField";
 	}
 
 	public TextField(float x, float y, float width, float height) {
 		super(x, y, width, height);
 		changeFontsize(20);
+		this.s = "TextField";
 	}
 
 	public boolean write = false;

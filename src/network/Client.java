@@ -311,7 +311,7 @@ public class Client extends Loggable {
 		return chats.get(chats.size() - 1);
 	}
 
-	public ArrayList<String> beginChat(String name) {
+	public synchronized ArrayList<String> beginChat(String name) {
 		return beginChat(name, "");
 	}
 
@@ -362,6 +362,23 @@ public class Client extends Loggable {
 		}
 
 		chat.add(msg);
+	}
+	
+	public String[] getChat(String name) {
+		for (ArrayList<String> chat : chats) {
+			if(chat.get(0).equals(name)) {
+				
+				String[] ret = new String[chat.size()];
+				
+				for (int i = 0; i < ret.length; i++) {
+					ret[i] = chat.get(i);
+				}
+				
+				return ret;
+			}
+		}
+		
+		return null;
 	}
 
 	public String[][] getChats() {

@@ -5,11 +5,15 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,7 +37,24 @@ public class Frame extends java.awt.Frame {
 		this.setSize(width, height);
 		this.setLocationRelativeTo(null);
 		this.setBackground(Color.DARK_GRAY.darker());
-
+		
+		addComponentListener(new ComponentListener() {
+			
+			@Override
+			public void componentShown(ComponentEvent e) {}
+			
+			@Override
+			public void componentResized(ComponentEvent e) {
+				drawingRect = new Rectangle(200, 0, getWidth()-200, getHeight());
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent e) {}
+			
+			@Override
+			public void componentHidden(ComponentEvent e) {}
+		});
+		
 		addMouseListener(new MouseListener() {
 
 			@Override
