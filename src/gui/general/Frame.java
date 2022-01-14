@@ -12,6 +12,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
 import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,6 +29,17 @@ public class Frame extends java.awt.Frame {
 	private CopyOnWriteArrayList<Group> groups = new CopyOnWriteArrayList<>();
 	private CopyOnWriteArrayList<Group> fixedGroups = new CopyOnWriteArrayList<>();
 	private Group[] currentGroups = new Group[0];
+	
+	private boolean draw = true;
+	
+	private Thread drawThread = new Thread() {
+		@Override
+		public void run() {
+			while (draw) {
+				draw();
+			}
+		}
+	};
 	
 	Rectangle drawingRect;
 
@@ -53,7 +66,43 @@ public class Frame extends java.awt.Frame {
 			@Override
 			public void componentHidden(ComponentEvent e) {}
 		});
-		
+		addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {
+				draw = false;
+				System.out.println("Iconified");
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				draw = true;
+				drawThread = new Thread() {
+					@Override
+					public void run() {
+						while(draw) {
+							draw();
+						}
+					}
+				};
+				drawThread.start();
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {}
+		});
 		addMouseListener(new MouseListener() {
 
 			@Override
@@ -190,33 +239,9 @@ public class Frame extends java.awt.Frame {
 		
 		createBufferStrategy(3);
 
-		Thread drawThread = new Thread() {
-			@Override
-			public void run() {
-				while (this.isAlive()) {
-					draw();
-				}
-			}
-		};
-
 		drawThread.start();
 		
-		Thread updateThread = new Thread() {
-			@Override
-			public void run() {
-				long time = System.currentTimeMillis();
-				long deltaTime = 0;
-				while(true) {
-					deltaTime = System.currentTimeMillis() - time;
-					if(deltaTime >= 100) {
-						update(false);
-					}
-				}
-			}
-		};
-
-		updateThread.setDaemon(true);
-		updateThread.start();
+		update(true);
 
 	}
 	
@@ -230,7 +255,7 @@ public class Frame extends java.awt.Frame {
 		}
 	}
 	
-	public Group[] getAllGroups() {
+	public synchronized Group[] getAllGroups() {
 		Group[] ret = new Group[groups.size() + fixedGroups.size()];
 		
 		for (int i = 0; i < fixedGroups.size(); i++) {
@@ -272,11 +297,8 @@ public class Frame extends java.awt.Frame {
 	}
 	
 	public void update(boolean forceUpdate) {
-		for (Group group : groups) {
-			group.update(this, drawingRect, forceUpdate);
-		}
-		for (Group group : fixedGroups) {
-			group.update(this, drawingRect, forceUpdate);
+		for (Group group : currentGroups) {
+			group.update(this, drawingRect, forceUpdate);	
 		}
 	}
 	
