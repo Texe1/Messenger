@@ -12,6 +12,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
+import gui.general.ClientFrame;
+import gui.general.Frame;
 import main.Loggable;
 
 public class Client extends Loggable {
@@ -19,6 +21,8 @@ public class Client extends Loggable {
 	Socket client;
 	DataOutputStream out;
 	DataInputStream in;
+	
+	ClientFrame f;
 
 	Thread receivingThread = new Thread() {
 		@Override
@@ -29,25 +33,44 @@ public class Client extends Loggable {
 		}
 	};
 
-	Thread sendingThread = new Thread() {
+	Thread sendingAndProcessingThread = new Thread() {
 		public void run() {
 			while (!client.isClosed()) {
+				if(contacts == null || contacts.length == 0) {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				if(localSlowMode) {
+					try {
+						Thread.sleep(slowModePause);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
 				while (!outQueue.isEmpty()) {
 					send(outQueue.remove(0));
+					if(f != null) f.update(true);
 				}
-			}
-		};
-	};
-
-	Thread processingThread = new Thread() {
-		public void run() {
-			while (!client.isClosed()) {
+				
 				while (!inQueue.isEmpty()) {
 					processMsg(inQueue.remove(0));
+					if(f != null) f.update(true);
 				}
 			}
 		};
 	};
+	
+	private boolean localSlowMode = false;
+	private int slowModePause = 200;// the pause between sending the messages in local slowmode (in milliseconds)
+	
+	public void setFrame(ClientFrame f){
+		this.f = f;
+		f.update(this, true);
+	}
 
 	private String[] contacts;
 
@@ -104,10 +127,8 @@ public class Client extends Loggable {
 
 		if (!receivingThread.isAlive())
 			receivingThread.start();
-		if (!sendingThread.isAlive())
-			sendingThread.start();
-		if (!processingThread.isAlive())
-			processingThread.start();
+		if (!sendingAndProcessingThread.isAlive())
+			sendingAndProcessingThread.start();
 	}
 
 	public void send(String s) {
