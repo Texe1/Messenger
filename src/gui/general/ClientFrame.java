@@ -47,14 +47,19 @@ public class ClientFrame extends Frame {
 			
 		});
 		
-		this.client = client;
-		
 		addFixed(new Menu(this));
 		
 		add(new ClientMainPage(this));
 		
 		showGroups(new int[] {0});
+		
+		update(true);
 
+	}
+	
+	public void update(Client c, boolean forceUpdate) {
+		this.client = c;
+		update(forceUpdate);
 	}
 
 	@Override
@@ -63,8 +68,6 @@ public class ClientFrame extends Frame {
 
 		if (client == null || !client.receivedContacts())
 			return;
-
-//		client.receivedContacts() = false;
 		
 		keepGroups(new int[] {0});
 
