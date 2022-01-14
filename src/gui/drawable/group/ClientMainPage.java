@@ -52,6 +52,7 @@ public class ClientMainPage extends Group{
 
 			@Override
 			public void run() {
+				if(frame.client == null) return;
 				if (frame.client.connected) {
 					frame.client.disconnect();
 					this.setText("connect");
