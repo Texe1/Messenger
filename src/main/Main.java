@@ -18,6 +18,7 @@ public class Main {
 
 		Scanner sc = new Scanner(System.in);
 		String input = sc.nextLine();
+		
 		if (input.equals("s")) {
 			Server.start(1337);
 			File f = new File("rsc\\serverLog.txt");
@@ -57,6 +58,8 @@ public class Main {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			
 		} else if (input.equals("c")) {
 
 			Client c = new Client();
@@ -79,6 +82,7 @@ public class Main {
 			
 			long time = System.nanoTime();
 			ClientFrame f = new ClientFrame(c);
+			c.setFrame(f);
 			time = System.nanoTime() - time;
 			System.out.println("Frame() contructor took " + time + "ns");
 			
