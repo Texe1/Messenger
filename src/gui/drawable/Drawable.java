@@ -13,7 +13,8 @@ public abstract class Drawable {
 
 	public boolean restrictUpdate = true;
 
-	protected String s = "Drawable";
+	protected String s = NAME_DEFAULT;
+	public static final String NAME_DEFAULT = "Drawable";
 
 	public Rectangle absoluteCoords = new Rectangle(0, 0, 0, 0);
 	private float[] scaledSizes = new float[] { 0, 0, 0, 0 };
