@@ -341,7 +341,9 @@ public class Client extends Loggable {
 				A = new BigInteger(getChat(name)[2], 16);
 				System.out.println("\tk2");
 			}
-			BigInteger I = new BigInteger(s.substring(s.indexOf('\\') + 1), 16);
+			
+			System.out.println(s.substring(s.indexOf('\\') + 2));
+			BigInteger I = new BigInteger(s.substring(s.indexOf('\\') + 2), 16);
 			
 			// generating key
 			char[] key = KeySchedule.KeyGeneration(
