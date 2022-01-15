@@ -336,7 +336,7 @@ public class Client extends Loggable {
 				
 				System.out.println("\tk1");
 			
-				outQueue.add("k2" + J.toString(16));
+				outQueue.add("k2" + name + "\\" + J.toString(16));
 			}else {// doesn't have to send back
 				A = new BigInteger(getChat(name)[2], 16);
 				System.out.println("\tk2");
@@ -409,7 +409,7 @@ public class Client extends Loggable {
 		BigInteger I = KeyExchange.step1(A);
 		chat.add(A.toString(16));
 		
-		
+		System.out.println("aaaaaaa|" + "k1" + name + "\\" + I.toString(16));
 		outQueue.add("k1" + name + "\\" + I.toString(16));
 		
 		return chats.get(chats.size() - 1);
