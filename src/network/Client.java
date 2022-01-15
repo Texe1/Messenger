@@ -24,7 +24,32 @@ public class Client extends Loggable {
 	DataInputStream in;
 	
 	ClientFrame f;
+	
+	private boolean localSlowMode = false;
+	private int slowModePause = 200;// the pause between sending the messages in local slowmode (in milliseconds)
 
+	private String[] contacts;
+
+	String host;
+	String name;
+	int serverPort;
+
+	boolean receivedContacts = false;
+
+	public boolean connected;
+
+	private ArrayList<ArrayList<String>> chats = new ArrayList<>();
+
+	public static final String[] encryptions = new String[] { "aes" };
+
+	public CopyOnWriteArrayList<String> outQueue = new CopyOnWriteArrayList<>();
+	public CopyOnWriteArrayList<String> inQueue = new CopyOnWriteArrayList<>();
+
+	public static OutputStream logger;
+
+	private boolean loop = true;
+	private int sendAttempts = 0;
+	
 	Thread receivingThread = new Thread() {
 		@Override
 		public void run() {
@@ -53,7 +78,13 @@ public class Client extends Loggable {
 				}
 				
 				while (!outQueue.isEmpty()) {
-					send(outQueue.remove(0));
+					if(send(outQueue.get(0))){
+						outQueue.remove(0);
+					}else {
+						String s = outQueue.get(0);
+						outQueue.remove(0);
+						outQueue.add(s);
+					}
 					if(f != null) f.update(true);
 				}
 				
@@ -64,36 +95,12 @@ public class Client extends Loggable {
 			}
 		};
 	};
-	
-	private boolean localSlowMode = false;
-	private int slowModePause = 200;// the pause between sending the messages in local slowmode (in milliseconds)
+
 	
 	public void setFrame(ClientFrame f){
 		this.f = f;
 		f.update(this, true);
 	}
-
-	private String[] contacts;
-
-	String host;
-	String name;
-	int serverPort;
-
-	boolean receivedContacts = false;
-
-	public boolean connected;
-
-	private ArrayList<ArrayList<String>> chats = new ArrayList<>();
-
-	public static final String[] encryptions = new String[] { "aes" };
-
-	public CopyOnWriteArrayList<String> outQueue = new CopyOnWriteArrayList<>();
-	public CopyOnWriteArrayList<String> inQueue = new CopyOnWriteArrayList<>();
-
-	public static OutputStream logger;
-
-	private boolean loop = true;
-	private int sendAttempts = 0;
 
 	public boolean isWaiting() {
 		return loop;
@@ -132,7 +139,7 @@ public class Client extends Loggable {
 			sendingAndProcessingThread.start();
 	}
 
-	public void send(String s) {
+	public boolean send(String s) {
 		log(s);
 		if (s.equals("q")) {
 			disconnect();
@@ -146,7 +153,7 @@ public class Client extends Loggable {
 			if (msg.startsWith("\"")) {// name in ""
 				if (!msg.substring(1).contains("\"")) {
 					System.err.println("Message syntax error:\n\tCould not detect end of receiver name");
-					return;
+					return true;
 				}
 				name = msg.substring(1).split("\"")[0];
 				msg = msg.substring(name.length() + 2);// "name" gets stripped away from message
@@ -155,8 +162,10 @@ public class Client extends Loggable {
 				msg = msg.substring(name.length() + 1);// name\ gets stripped away from message
 			} else {
 				System.err.println("Message syntax error:\n\tCould not detect receiver name");
-				return;
+				return true;
 			}
+			
+			
 
 			if (msg.startsWith(" ")) {// aes as standard encryption: message is altered to specific aes encryption
 				msg = "aes" + msg.substring(1);
@@ -164,10 +173,18 @@ public class Client extends Loggable {
 			if (msg.startsWith("aes")) {// specific request to encrypt with aes
 				msg = msg.substring(3);
 
+				if (getChat(name) == null) {
+					beginChat(name, "aes");
+					return false;// keep message on outQueue
+				}
 				
-//				TODO fix Encryption
+				if(getChat(name)[2].length() > 32) {
+					return false;
+				}
+				
+				char[] key = getChat(name)[2].toCharArray();
 				// encrypting the main message
-				String encrypted = Encryption.encrypt(msg, getChat(name)[2].toCharArray());
+				String encrypted = Encryption.encrypt(msg, key);
 //				String key = KeySchedule.Key;
 
 				// converting key to char[8]
@@ -179,16 +196,16 @@ public class Client extends Loggable {
 //					keyAschars[i] = (char) Integer.parseInt(splitKey[i], 2);
 //				}
 
-				// preparing message head
-				String send = "me" + name + "\\aes";
+				// preparing message
+				String send = "me" + name + "\\aes" + encrypted;
 
-				// adding key
-				for (char c : keyAschars) {
-					send += "" + c;
-				}
+////				adding key
+//				for (char c : key) {
+//					send += "" + c;
+//				}
 
 				// adding encrypted message
-				send += encrypted;
+//				send += encrypted;
 
 				if (out == null) {// OutputStream is not yet defined
 					try {
@@ -199,13 +216,13 @@ public class Client extends Loggable {
 						if (sendAttempts++ > 10) {
 							System.err.println("problem constantly recurring...\nshutdown initiated...");
 							disconnect();
-							return;
+							return true;
 						}
 						System.err.println("rebooting client...");
 						reboot();
 						System.err.println("resending message...");
 						send(s);
-						return;
+						return true;
 					}
 				}
 
@@ -216,7 +233,7 @@ public class Client extends Loggable {
 				} catch (IOException e) {
 					System.err.println("I/O Error while sending message:");
 					e.printStackTrace();
-					return;
+					return true;
 				}
 			}
 		} else {
@@ -225,9 +242,11 @@ public class Client extends Loggable {
 				out.writeUTF(s);
 			} catch (IOException e) {
 				e.printStackTrace();
-				return;
+				return true;
 			}
 		}
+		
+		return true;
 	}
 
 	public void waitForMessage() {// waiting for Messages from Server or User and adding them to inQueue
@@ -379,8 +398,6 @@ public class Client extends Loggable {
 		log("began chat with '" + name + "'on Encryption '" + encryption + "'");
 		
 		//key Exchange start
-		char[] key = KeySchedule.KeyGeneration(BigInteger.ZERO);
-		
 		BigInteger A = KeyExchange.randomPrime();
 		
 		BigInteger I = KeyExchange.step1(A);
@@ -400,10 +417,18 @@ public class Client extends Loggable {
 		for (ArrayList<String> chat : chats) {
 			if (chat.get(0).equals(name)) {
 				chat.set(1, encryption);
+				if(encryption.equals("aes")) {
+					//key Exchange start
+					BigInteger A = KeyExchange.randomPrime();
+					
+					BigInteger I = KeyExchange.step1(A);
+					chat.add(A.toString(16));
+					
+					outQueue.add("k1" + I.toString(16));
+				}
+				break;
 			}
 		}
-		
-		// TODO: Key Exchange
 	}
 
 	public boolean sendThroughChat(String name, String msg) {
