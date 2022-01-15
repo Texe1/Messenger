@@ -78,6 +78,7 @@ public class Menu extends Group{
 		int i = pages.indexOf(s);
 		
 		MenuButton mb = menuButtons.remove(i);
+		pages.remove(i);
 		
 		buttons.remove(mb);
 		drawables.remove(mb);

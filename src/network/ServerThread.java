@@ -126,6 +126,11 @@ public class ServerThread extends Thread {
 						+ clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
 			}
 			
+		} else if(s.startsWith("k")) {
+			String name = s.substring(2, s.indexOf('\\'));
+			
+			String send = s.substring(0, 2) + this.clientName + '\\' + s.substring(s.indexOf('\\'));
+			
 		} else {
 			Server.log("<" + clientName + "> " + s + " | could not understand intentions");
 		}

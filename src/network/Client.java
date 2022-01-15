@@ -140,11 +140,9 @@ public class Client extends Loggable {
 	}
 
 	public boolean send(String s) {
-		log(s);
+		log("trying to send: " + s);
 		if (s.equals("q")) {
 			disconnect();
-			
-		
 		} else if (s.startsWith("me")) {// wants to encrypt message
 
 			String msg = s.substring(2);
@@ -237,7 +235,7 @@ public class Client extends Loggable {
 				}
 			}
 		} else {
-
+			log(s);
 			try {
 				out.writeUTF(s);
 			} catch (IOException e) {
@@ -268,6 +266,7 @@ public class Client extends Loggable {
 	}
 
 	private synchronized void processMsg(String s) {
+		log("processing message: " + s);
 		if (s.startsWith(">c")) {// receiving updated list of contacts
 
 			if (s.length() > 3) {
@@ -408,7 +407,7 @@ public class Client extends Loggable {
 		chat.add(A.toString(16));
 		
 		
-		outQueue.add("k1" + I.toString(16));
+		outQueue.add("k1" + name + "\\" + I.toString(16));
 		
 		return chats.get(chats.size() - 1);
 	}
@@ -428,7 +427,7 @@ public class Client extends Loggable {
 					BigInteger I = KeyExchange.step1(A);
 					chat.add(A.toString(16));
 					
-					outQueue.add("k1" + I.toString(16));
+					outQueue.add("k1" + name + "\\" + I.toString(16));
 				}
 				break;
 			}
