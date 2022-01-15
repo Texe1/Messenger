@@ -1,12 +1,13 @@
 package aes;
 
 import java.util.Random;
+import java.math.BigInteger;
 
 
 
 public class KeySchedule {
 
-	public static String Key;
+
 	public static char[] SubstitutionMap = new char[] {
 			0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
 			0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
@@ -28,36 +29,40 @@ public class KeySchedule {
 	
 	public static char[][] KeyWords = new char[44][4];
 
-	public static String KeyGeneration() {
-		Random r = new Random();
-		char[] key = new char[8];
-		Key = "";
-
-		// TODO char[] key (unimplemented)
-		for (int i = 0; i < 8; i++) {
-			key[i] = (char) r.nextInt(65536);
-//			System.out.println(Integer.toBinaryString((int) key[i]));
-		}
-
-		for (int i = 0; i < 128; i++) {
-			Key += ((int) (Math.random() + 0.5)); // Key-Generation
-		}
+	public static char[] KeyGeneration(BigInteger I) {
+//		Random r = new Random();
+//		char[] key = new char[8];
+//		Key = "";
+//
+//		// TODO char[] key (unimplemented)
+//		for (int i = 0; i < 8; i++) {
+//			key[i] = (char) r.nextInt(65536);
+////			System.out.println(Integer.toBinaryString((int) key[i]));
+//		}
+//
+//		for (int i = 0; i < 128; i++) {
+//			Key += ((int) (Math.random() + 0.5)); // Key-Generation
+//		}
+		
+		String s = I.toString(2);
+	    String KeyText= s.substring(1, 129);
+		char[] Key = new char[KeyText.length()/8];
+		for (int i = 0; i < Key.length; i++) {
+			int Z =0;
+			Z = Integer.parseInt(KeyText.substring(i*8,(i*8+8)),2);
+			Key[i] =((char)Z);
+		}	
 
 		return Key;
 	}
 
-	public static void keySchedule(String key) {
+	public static void keySchedule(char[] key) {
 
-		String KeyText = "";
-		for (int i = 0; i < key.length()/8; i++) {
-			int Z =0;
-			Z = Integer.parseInt(key.substring(i*8,(i*8+8)),2);
-			KeyText +=((char)Z);
-		}		
+			
 
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
-				KeyWords[i][j] = KeyText.charAt((i * 4) + j);
+				KeyWords[i][j] = key[(i * 4) + j];
 			}
 		}
 		char[] RoundConstant = new char[] {'\u0001','\u0002','\u0004','\u0008','\u0010','\u0020','\u0040','\u0080','\u001B','\u0036'};

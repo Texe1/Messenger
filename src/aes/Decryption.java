@@ -3,7 +3,7 @@ package aes;
 
 public class Decryption {
 
-	public static String decrypt(String s, String key) {
+	public static String decrypt(String s, char[] key) {
 
 		KeySchedule.keySchedule(key);
 

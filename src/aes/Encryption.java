@@ -2,16 +2,16 @@ package aes;
 
 public class Encryption {
 
-	public static String encrypt(String s) {
+	public static String encrypt(String s, char[] key) {
 
-		KeySchedule.keySchedule(KeySchedule.KeyGeneration());
+		KeySchedule.keySchedule(key);
 
 		while (s.length() % 16 != 0) {
 			s += " ";
 		}
 
 		char[] WorkChar = new char[16];
-		
+
 		char c;
 		String OutputString = "";
 
@@ -29,7 +29,7 @@ public class Encryption {
 				for (int j = 0; j < 16; j++) {
 
 					// Substitution
-					WorkChar[j]=KeySchedule.SubstitutionMap[Integer.valueOf(WorkChar[j])];	
+					WorkChar[j] = KeySchedule.SubstitutionMap[Integer.valueOf(WorkChar[j])];
 				}
 
 				// Permutation
@@ -51,17 +51,18 @@ public class Encryption {
 				WorkChar[11] = WorkChar[7];
 				WorkChar[7] = WorkChar[3];
 				WorkChar[3] = c;
-				
-				//matrix
+
+				// matrix
 				for (int j = 0; j < 4; j++) {
 					char[] e = new char[4];
-					e = KeySchedule.mixColumns(WorkChar[j*4],WorkChar[(j*4)+1],WorkChar[(j*4)+2],WorkChar[(j*4)+3]);
-					WorkChar[j*4]     = e[0];
-					WorkChar[(j*4)+1] = e[1];
-					WorkChar[(j*4)+2] = e[2];
-					WorkChar[(j*4)+3] = e[3];
+					e = KeySchedule.mixColumns(WorkChar[j * 4], WorkChar[(j * 4) + 1], WorkChar[(j * 4) + 2],
+							WorkChar[(j * 4) + 3]);
+					WorkChar[j * 4] = e[0];
+					WorkChar[(j * 4) + 1] = e[1];
+					WorkChar[(j * 4) + 2] = e[2];
+					WorkChar[(j * 4) + 3] = e[3];
 				}
-				
+
 				// Add RoundKey
 				for (int j = 0; j < 3; j++) {
 					for (int j2 = 0; j2 < 3; j2++) {
