@@ -128,8 +128,16 @@ public class ServerThread extends Thread {
 			
 		} else if(s.startsWith("k")) {
 			String name = s.substring(2, s.indexOf('\\'));
-			
-			String send = s.substring(0, 2) + this.clientName + '\\' + s.substring(s.indexOf('\\'));
+		
+			if (Server.clientNames.contains(name)) {// the requested receiver is connected to the server
+				int clientID = Server.clientNames.indexOf(name);
+				String send = s.substring(0, 2) + this.clientName + '\\' + s.substring(s.indexOf('\\'));
+				Server.threads.get(clientID).queueMsg(send);
+				
+			} else {// the requested receiver is not connected to the server
+				System.err.println("Server Error:\n\r\tCould not find client \"" + name + "\" for receiving key from "
+						+ clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
+			}
 			
 		} else {
 			Server.log("<" + clientName + "> " + s + " | could not understand intentions");
