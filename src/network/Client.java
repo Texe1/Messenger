@@ -327,17 +327,20 @@ public class Client extends Loggable {
 				log("Message from <Anonymus>:\n\t" + s);
 			}
 		} else if(s.charAt(0) == 'k') {// KeyExchange
-			
+			System.out.println("key Exchange!!");
 			String name = s.substring(2, s.indexOf('\\'));
 			
 			BigInteger A = null;
 			if(s.charAt(1) == '1') {// has to send back
 				A = KeyExchange.randomPrime();
 				BigInteger J = KeyExchange.step1(A);
+				
+				System.out.println("\tk1");
 			
 				outQueue.add("k2" + J.toString(16));
 			}else {// doesn't have to send back
 				A = new BigInteger(getChat(name)[2], 16);
+				System.out.println("\tk2");
 			}
 			BigInteger I = new BigInteger(s.substring(s.indexOf('\\') + 1), 16);
 			
