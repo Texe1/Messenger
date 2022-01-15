@@ -327,7 +327,7 @@ public class Client extends Loggable {
 			}
 		} else if(s.charAt(0) == 'k') {// KeyExchange
 			System.out.println("key Exchange!!");
-			String name = s.substring(2, s.indexOf('\\'));
+			String name = s.substring(2, s.indexOf('\\')+1);
 			
 			BigInteger A = null;
 			if(s.charAt(1) == '1') {// has to send back
@@ -360,7 +360,7 @@ public class Client extends Loggable {
 			}
 			
 			if(chat == null) {
-				System.err.println("Fatal error during KeyExchange: Name not found");
+				System.err.println("Fatal error during KeyExchange: Name " + " not found");
 			}
 			
 			chat.set(2, key.toString());
