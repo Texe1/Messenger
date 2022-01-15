@@ -77,7 +77,7 @@ public class Client extends Loggable {
 					}
 				}
 				
-				while (!outQueue.isEmpty()) {
+				if (!outQueue.isEmpty()) {
 					if(send(outQueue.get(0))){
 						outQueue.remove(0);
 					}else {
@@ -88,7 +88,7 @@ public class Client extends Loggable {
 					if(f != null) f.update(true);
 				}
 				
-				while (!inQueue.isEmpty()) {
+				if (!inQueue.isEmpty()) {
 					processMsg(inQueue.remove(0));
 					if(f != null) f.update(true);
 				}
