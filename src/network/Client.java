@@ -13,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
+import diffie_hellman.KeyExchange;
 import gui.general.ClientFrame;
 import main.Loggable;
 
@@ -163,18 +164,20 @@ public class Client extends Loggable {
 			if (msg.startsWith("aes")) {// specific request to encrypt with aes
 				msg = msg.substring(3);
 
+				
+//				TODO fix Encryption
 				// encrypting the main message
-				String encrypted = Encryption.encrypt(msg);
+				String encrypted = Encryption.encrypt(msg, getChat(name)[2].toCharArray());
 //				String key = KeySchedule.Key;
 
 				// converting key to char[8]
-				char[] keyAschars = new char[8];
+//				char[] keyAschars = new char[8];
 
-				String[] splitKey = key.split("(?<=\\G.{16})");
-
-				for (int i = 0; i < 8; i++) {
-					keyAschars[i] = (char) Integer.parseInt(splitKey[i], 2);
-				}
+//				String[] splitKey = key.split("(?<=\\G.{16})");
+//
+//				for (int i = 0; i < 8; i++) {
+//					keyAschars[i] = (char) Integer.parseInt(splitKey[i], 2);
+//				}
 
 				// preparing message head
 				String send = "me" + name + "\\aes";
@@ -275,18 +278,18 @@ public class Client extends Loggable {
 		} else if (s.startsWith("me")) { // receiving encrypted message
 			String origin = s.substring(2, s.indexOf('\\'));
 			String encrMsg = s.substring(s.indexOf('\\') + 12);
-			char[] keyAsChars = s.substring(s.indexOf('\\') + 4, s.indexOf('\\') + 12).toCharArray();
+			char[] key = s.substring(s.indexOf('\\') + 4, s.indexOf('\\') + 12).toCharArray();
 
-			String keyBinStr = "";
+//			String keyBinStr = "";
+//
+//			for (char c : keyAsChars) {
+//				String t = Integer.toBinaryString((int) c);
+//				while (t.length() < 16)
+//					t = "0" + t;
+//				keyBinStr += t;
+//			}
 
-			for (char c : keyAsChars) {
-				String t = Integer.toBinaryString((int) c);
-				while (t.length() < 16)
-					t = "0" + t;
-				keyBinStr += t;
-			}
-
-			String msg = Decryption.decrypt(encrMsg, keyBinStr);
+			String msg = Decryption.decrypt(encrMsg, key);
 
 			log("received message from '" + origin + ":\n" + msg + "\n_____");
 			addToChat(origin, msg);
@@ -304,6 +307,40 @@ public class Client extends Loggable {
 				}
 				log("Message from <Anonymus>:\n\t" + s);
 			}
+		} else if(s.charAt(0) == 'k') {// KeyExchange
+			
+			String name = s.substring(2, s.indexOf('\\'));
+			
+			BigInteger A = null;
+			if(s.charAt(1) == '1') {// has to send back
+				A = KeyExchange.randomPrime();
+				BigInteger J = KeyExchange.step1(A);
+			
+				outQueue.add("k2" + J.toString(16));
+			}else {// doesn't have to send back
+				A = new BigInteger(getChat(name)[2], 16);
+			}
+			BigInteger I = new BigInteger(s.substring(s.indexOf('\\') + 1), 16);
+			
+			// generating key
+			char[] key = KeySchedule.KeyGeneration(
+					KeyExchange.step2(I, A)
+				);
+			
+			ArrayList<String> chat = null;
+			
+			for (ArrayList<String> c : chats) {
+				if(c.get(0).equals(name)) {
+					chat = c;
+					break;
+				}
+			}
+			
+			if(chat == null) {
+				System.err.println("Fatal error during KeyExchange: Name not found");
+			}
+			
+			chat.set(2, key.toString());
 		}
 	}
 
@@ -334,17 +371,23 @@ public class Client extends Loggable {
 	
 	public synchronized ArrayList<String> beginChat(String name, String encryption) {
 		chats.add(new ArrayList<String>());
-		chats.get(chats.size() - 1).add(name);
-		chats.get(chats.size() - 1).add(encryption);
+		ArrayList<String> chat = chats.get(chats.size() - 1);
+		
+		chat.add(name);
+		chat.add(encryption);
 		
 		log("began chat with '" + name + "'on Encryption '" + encryption + "'");
 		
 		//key Exchange start
 		char[] key = KeySchedule.KeyGeneration(BigInteger.ZERO);
 		
-		chats.get(chats.size()-1).add(key.toString());
+		BigInteger A = KeyExchange.randomPrime();
 		
-		outQueue.add("k" + BigInteger.ZERO.toString(16));
+		BigInteger I = KeyExchange.step1(A);
+		chat.add(A.toString(16));
+		
+		
+		outQueue.add("k1" + I.toString(16));
 		
 		return chats.get(chats.size() - 1);
 	}
