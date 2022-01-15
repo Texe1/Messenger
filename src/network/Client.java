@@ -360,6 +360,7 @@ public class Client extends Loggable {
 			}
 			
 			chat.set(2, key.toString());
+			System.out.println(key.toString());
 		}
 	}
 
