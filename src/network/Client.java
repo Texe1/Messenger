@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ public class Client extends Loggable {
 
 				// encrypting the main message
 				String encrypted = Encryption.encrypt(msg);
-				String key = KeySchedule.Key;
+//				String key = KeySchedule.Key;
 
 				// converting key to char[8]
 				char[] keyAschars = new char[8];
@@ -330,12 +331,20 @@ public class Client extends Loggable {
 		connect(host, serverPort, name);
 	}
 
-	public ArrayList<String> beginChat(String name, String encryption) {
+	
+	public synchronized ArrayList<String> beginChat(String name, String encryption) {
 		chats.add(new ArrayList<String>());
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
 		
 		log("began chat with '" + name + "'on Encryption '" + encryption + "'");
+		
+		//key Exchange start
+		char[] key = KeySchedule.KeyGeneration(BigInteger.ZERO);
+		
+		chats.get(chats.size()-1).add(key.toString());
+		
+		outQueue.add("k" + BigInteger.ZERO.toString(16));
 		
 		return chats.get(chats.size() - 1);
 	}
