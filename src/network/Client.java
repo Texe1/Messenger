@@ -360,7 +360,8 @@ public class Client extends Loggable {
 			}
 			
 			if(chat == null) {
-				System.err.println("Fatal error during KeyExchange: Name " + name + " not found");
+				System.err.println("Light exception during KeyExchange: Name " + name + " not found");
+				chat = beginChat(name);
 			}
 			
 			chat.set(2, key.toString());
