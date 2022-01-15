@@ -13,7 +13,6 @@ import aes.Decryption;
 import aes.Encryption;
 import aes.KeySchedule;
 import gui.general.ClientFrame;
-import gui.general.Frame;
 import main.Loggable;
 
 public class Client extends Loggable {
@@ -135,6 +134,8 @@ public class Client extends Loggable {
 		log(s);
 		if (s.equals("q")) {
 			disconnect();
+			
+		
 		} else if (s.startsWith("me")) {// wants to encrypt message
 
 			String msg = s.substring(2);
@@ -156,7 +157,6 @@ public class Client extends Loggable {
 			}
 
 			if (msg.startsWith(" ")) {// aes as standard encryption: message is altered to specific aes encryption
-										// request
 				msg = "aes" + msg.substring(1);
 			}
 			if (msg.startsWith("aes")) {// specific request to encrypt with aes
@@ -334,8 +334,8 @@ public class Client extends Loggable {
 		chats.add(new ArrayList<String>());
 		chats.get(chats.size() - 1).add(name);
 		chats.get(chats.size() - 1).add(encryption);
-
-		log("began chat with " + name);
+		
+		log("began chat with '" + name + "'on Encryption '" + encryption + "'");
 		
 		return chats.get(chats.size() - 1);
 	}
@@ -350,6 +350,8 @@ public class Client extends Loggable {
 				chat.set(1, encryption);
 			}
 		}
+		
+		// TODO: Key Exchange
 	}
 
 	public boolean sendThroughChat(String name, String msg) {
