@@ -63,7 +63,7 @@ public class Chat extends Group {
 			
 //			this.messages = new CopyOnWriteArrayList<>();
 			
-			for (int i = this.messages.size()+2; i < chat.length; i++) {
+			for (int i = this.messages.size()+3; i < chat.length; i++) {
 				s2 = chat[i];
 
 				updated = true;
