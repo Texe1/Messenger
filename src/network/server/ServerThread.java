@@ -1,10 +1,12 @@
-package network;
+package network.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import network.client.Client;
 
 public class ServerThread extends Thread {
 
@@ -106,7 +108,7 @@ public class ServerThread extends Thread {
 			Server.clientNames.remove(clientName);
 			Server.threads.remove(this);
 			Server.log(clientName + " at [" + client.getInetAddress() + ":" + client.getPort() + "] has disconnected.");
-			Server.updateContacts();
+//			Server.updateContacts();
 			try {
 				client.close();
 			} catch (IOException e) {
@@ -126,16 +128,17 @@ public class ServerThread extends Thread {
 						+ clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
 			}
 			
-		} else if(s.startsWith("k")) {
-			String name = s.substring(2, s.indexOf('\\'));
+		} else if(s.startsWith("" + Client.MSG_KEY_INIT) || s.startsWith("" + Client.MSG_KEY_RESPONSE)) {
+			Server.log(s);
+			String name = s.substring(1, s.indexOf('\\'));
 		
 			if (Server.clientNames.contains(name)) {// the requested receiver is connected to the server
 				int clientID = Server.clientNames.indexOf(name);
-				String send = s.substring(0, 2) + this.clientName + '\\' + s.substring(s.indexOf('\\'));
+				String send = s.substring(0, 1) + this.clientName + s.substring(s.indexOf('\\'));
 				Server.threads.get(clientID).queueMsg(send);
 				
 			} else {// the requested receiver is not connected to the server
-				System.err.println("Server Error:\n\r\tCould not find client \"" + name + "\" for receiving key from "
+				System.err.println("Server Error:\n\r\tCould not find client '" + name + "' for receiving key from "
 						+ clientName + " at [" + client.getInetAddress() + ":" + client.getLocalPort() + "]");
 			}
 			

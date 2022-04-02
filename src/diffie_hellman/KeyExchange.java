@@ -21,6 +21,7 @@ public class KeyExchange{
         }
         return I;
 	}
+	
     public static BigInteger step1 (BigInteger I) {
 		BigInteger J = new BigInteger("" + g);
 		BigInteger A = J.modPow(I, p);

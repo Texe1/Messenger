@@ -9,7 +9,7 @@ import gui.drawable.Button;
 import gui.drawable.Text;
 import gui.drawable.TextField;
 import gui.general.Frame;
-import network.Client;
+import network.client.Client;
 
 public class Chat extends Group {
 

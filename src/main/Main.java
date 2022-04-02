@@ -6,9 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-import gui.general.ClientFrame;
-import network.Client;
-import network.Server;
+import network.client.Client;
+import network.server.Server;
 
 public class Main {
 	
@@ -62,31 +61,37 @@ public class Main {
 			
 		} else if (input.equals("c")) {
 
-			Client c = new Client();
-			File logFile = new File("rsc\\clientLog.txt");
-			
-			for(int i = 0; true; i++) {
-				logFile = new File("rsc\\clientLog" + i + ".txt");
-				if(!logFile.exists())
-					break;
-			}
-			
 			try {
-				logFile.createNewFile();
-			} catch (IOException e) {
+				Client c = new Client("localhost", 1337, "B");
+			} catch (Exception e) {
 				e.printStackTrace();
-				logFile = null;
+				sc.close();
+				return;
 			}
-			if(logFile == null)	c.setLogger(System.out);
-			else 				c.setLogger(logFile);
+//			File logFile = new File("rsc\\clientLog.txt");
+//			
+//			for(int i = 0; true; i++) {
+//				logFile = new File("rsc\\clientLog" + i + ".txt");
+//				if(!logFile.exists())
+//					break;
+//			}
+//			
+//			try {
+//				logFile.createNewFile();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//				logFile = null;
+//			}
+//			if(logFile == null)	c.setLogger(System.out);
+//			else 				c.setLogger(logFile);
 			
-			long time = System.nanoTime();
-			ClientFrame f = new ClientFrame(c);
-			c.setFrame(f);
-			time = System.nanoTime() - time;
-			System.out.println("Frame() contructor took " + time + "ns");
+//			long time = System.nanoTime();
+//			ClientFrame f = new ClientFrame(c);
+//			c.setFrame(f);
+//			time = System.nanoTime() - time;
+//			System.out.println("Frame() contructor took " + time + "ns");
 			
-			f.requestFocus();
+//			f.requestFocus();
 			
 		} else {
 			System.out.println("that was not one of the options!");

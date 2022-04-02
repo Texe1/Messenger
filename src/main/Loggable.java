@@ -6,10 +6,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+
+import network.client.Chat;
 
 public class Loggable {
 	
 	public OutputStream logger;
+	
+	public ArrayList<Chat> chats = new ArrayList<>();
 	
 	public void setLogger(OutputStream out) {
 		logger = out;

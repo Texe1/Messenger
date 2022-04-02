@@ -7,7 +7,7 @@ import java.awt.event.WindowListener;
 import gui.drawable.group.Chat;
 import gui.drawable.group.ClientMainPage;
 import gui.drawable.group.Menu;
-import network.Client;
+import network.client.Client;
 
 public class ClientFrame extends Frame {
 
