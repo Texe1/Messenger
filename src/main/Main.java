@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
+import network.client.Chat;
 import network.client.Client;
 import network.server.Server;
 
@@ -63,35 +64,32 @@ public class Main {
 
 			try {
 				Client c = new Client("localhost", 1337, "B");
+				Client d = new Client("localhost", 1337, "A");
+				
+				Thread.sleep(10000);
+				
+				c.send("mA\\Hallo");
+				c.send("mA\\Hallo");
+				c.send("mA\\Hallo");
+				c.send("mA\\Hallo");
+
+				Thread.sleep(10000);
+				
+				System.out.println(c.chats.size());
+				
+				Chat chat = c.chats.get(0);
+				
+				System.out.println("messages from 'B' to 'A':" + chat.messages.size());
+				for (String s : chat.messages) {
+					System.out.println(s);
+				}
+				System.out.println();
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				sc.close();
 				return;
 			}
-//			File logFile = new File("rsc\\clientLog.txt");
-//			
-//			for(int i = 0; true; i++) {
-//				logFile = new File("rsc\\clientLog" + i + ".txt");
-//				if(!logFile.exists())
-//					break;
-//			}
-//			
-//			try {
-//				logFile.createNewFile();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//				logFile = null;
-//			}
-//			if(logFile == null)	c.setLogger(System.out);
-//			else 				c.setLogger(logFile);
-			
-//			long time = System.nanoTime();
-//			ClientFrame f = new ClientFrame(c);
-//			c.setFrame(f);
-//			time = System.nanoTime() - time;
-//			System.out.println("Frame() contructor took " + time + "ns");
-			
-//			f.requestFocus();
 			
 		} else {
 			System.out.println("that was not one of the options!");

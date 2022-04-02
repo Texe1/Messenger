@@ -3,6 +3,7 @@ package network.client;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import aes.Decryption;
 import aes.KeySchedule;
 import diffie_hellman.KeyExchange;
 
@@ -12,7 +13,8 @@ public class Chat {
 	private String name;
 	private Encryption encryption;
 
-	private ArrayList<String> messages = new ArrayList<>();
+	// TODO set to private
+	public ArrayList<String> messages = new ArrayList<>();
 
 	public boolean locked() {
 		return locked;
@@ -42,8 +44,28 @@ public class Chat {
 		return messages.toArray(new String[0]);
 	}
 
-	public void addMessage(String s) {
+	public boolean addMessage(String s) {
+		if(locked) return false;
+		if(encryption == Encryption.AES) {
+			String decrypted = Decryption.decrypt(s, key.toCharArray());
+			messages.add(decrypted);
+			return true;
+		}
+		
 		messages.add(s);
+		return true;
+	}
+	
+	public boolean addRawMsg(String s) {
+		if(locked) return false;
+		
+		messages.add(s);
+		return true;
+	}
+	
+	public String encrypt(String s) {
+		addRawMsg(s);
+		return aes.Encryption.encrypt(s, key.toCharArray());
 	}
 
 	public Chat(String name) {
@@ -58,6 +80,7 @@ public class Chat {
 		BigInteger A = new BigInteger(key, 16);
 
 		key = new String(KeySchedule.KeyGeneration(KeyExchange.step2(B, A)));
+		locked = false;
 	}
 
 	public static enum Encryption {

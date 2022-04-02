@@ -116,7 +116,7 @@ public class ServerThread extends Thread {
 			}
 
 		} else if (s.startsWith("m")) { // sending a message to other client
-			String name = s.substring(2, s.indexOf('\\'));
+			String name = s.substring(1, s.indexOf('\\'));
 			
 			if (Server.clientNames.contains(name)) {// the requested receiver is connected to the server
 				int clientID = Server.clientNames.indexOf(name);
